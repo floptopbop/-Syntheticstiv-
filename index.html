@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+<script>eruda.init();</script>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>AXIOM-OS // SONIC SYNTHESIS</title>
@@ -624,6 +627,8 @@
   let rhythmRate = 8, rhythmDepth = 1.0, isPlaying = false;
   let loadedImage = null, imgRect = null, lastRoot = 0;
   let wheelRotation = 0;
+let bassTriggered = false, padTriggered = false, leadTriggered = false;
+
   // one Tone engine; each voice holds its own synth + optional sampler
   let toneStarted = false, samplePulseNext = 0;
   const sampleNote = { bass:'C2', pad:'C4', lead:'C5', rhythm:'C3' }; // current note per voice
@@ -831,6 +836,7 @@
     }
   }
 
+
   // trigger a voice at a note for a duration — sampler wins if one is loaded
   function playVoice(key, note, dur, vel, time){
     const v=voices[key]; if(!v) return;
@@ -846,74 +852,106 @@
     }
   }
 
-  function releaseAll() {
-    VKEYS.forEach(k=>{ const v=voices[k]; if(!v) return;
-      try{ if(v.synth&&v.synth.releaseAll) v.synth.releaseAll(); }catch(e){}
-      try{ if(v.sampler&&v.sampler.releaseAll) v.sampler.releaseAll(); }catch(e){}
-    });
+function releaseAll() {
+  VKEYS.forEach(k => {
+    const v = voices[k];
+    if (!v) return;
+    try { if (v.synth && v.synth.releaseAll) v.synth.releaseAll(); } catch (e) {}
+    try { if (v.sampler && v.sampler.releaseAll) v.sampler.releaseAll(); } catch (e) {}
+  });
+}
+
+function updateSynth(mV, mH) {
+  if (!audioCtx || !voices.bass) return;
+  const mPri = mV || mH;
+  if (!mPri) return;
+
+  const bright = mPri.luminance, sat = mPri.saturation, vivid = mPri.hueStr;
+  const rootIdx = vivid > 0.05 ? hueToNote(mPri.hue + wheelRotation) : lastRoot;
+  lastRoot = rootIdx;
+
+  let third, qual;
+  if      (scaleMode === 'MAJOR')     { third = 4; qual = ''; }
+  else if (scaleMode === 'MINOR')     { third = 3; qual = 'm'; }
+  else if (scaleMode === 'DISSONANT') { third = 6; qual = '(b5)'; }
+  else if (sat < 0.14)                { third = 7; qual = '5'; }
+  else if (bright >= 0.5)             { third = 4; qual = ''; }
+  else                                { third = 3; qual = 'm'; }
+
+  const use7 = sat > 0.45 && third !== 7;
+  const trans = k => VTRANS[k] || 0;
+  const vOct = { bass: -2, pad: 0, lead: 1, rhythm: -1 };
+
+  const now = Tone.now();
+
+  // scan speed -> 0..1, ONLY if those vars exist. Won't crash if they don't.
+  let scanFactor = 0;
+  if (typeof scanSpeed !== 'undefined' && typeof SCAN_MIN !== 'undefined' && typeof SCAN_MAX !== 'undefined') {
+    scanFactor = Math.max(0, Math.min(1, (scanSpeed - SCAN_MIN) / (SCAN_MAX - SCAN_MIN)));
   }
 
-  // Called every frame with the current scan metrics. Builds one chord and
-  // pulses every voice (synth or sample) on a shared clock.
-  function updateSynth(mV,mH) {
-    if(!audioCtx || !voices.bass) return;
-    const mPri = mV||mH; if(!mPri) return;
-
-    const bright = mPri.luminance, sat = mPri.saturation, vivid = mPri.hueStr;
-    // hue -> root (wheel rotation transposes); hold last root through grey
-    const rootIdx = vivid > 0.05 ? hueToNote(mPri.hue + wheelRotation) : lastRoot;
-    lastRoot = rootIdx;
-
-    let third, qual;
-    if      (scaleMode==='MAJOR')     { third=4; qual=''; }
-    else if (scaleMode==='MINOR')     { third=3; qual='m'; }
-    else if (scaleMode==='DISSONANT') { third=6; qual='(b5)'; }
-    else if (sat < 0.14)              { third=7; qual='5'; }
-    else if (bright >= 0.5)           { third=4; qual=''; }
-    else                              { third=3; qual='m'; }
-    const use7 = sat > 0.45 && third!==7;
-    const seventh = bright >= 0.6 ? 11 : 10;
-    const fifth = 7;
-    const trans = k => VTRANS[k]||0;
-
-    const topInt = use7 ? seventh : fifth;
-    const vInt = { bass:0, pad:third, lead:topInt, rhythm:0 };
-    const vOct = { bass:-2, pad:0, lead:1, rhythm:-1 };
-    VKEYS.forEach(k=>{ sampleNote[k] = noteFromSemis(rootIdx + vInt[k] + trans(k), vOct[k]); });
-
-    const now = Tone.now();
-
-    // RHYTHM voice — its own edge-driven pulse
-    {
-      const edgeMod = mPri.edgeDensity*rhythmDepth;
-      const rate = rhythmRate*(0.4+edgeMod*2.6);
-      const interval = (1/Math.max(rate,0.3))*(0.7+Math.random()*0.6);
-      if(now >= rhythmNext){
-        rhythmNext = now + interval;
-        if(voices.rhythm.instr!=='OFF' || voices.rhythm.sampler)
-          playVoice('rhythm', sampleNote.rhythm, 0.18, 0.6, now);
-      }
-    }
-
-    // BASS/PAD/LEAD — steady chord pulse so they sustain and follow the scan
-    if(now >= samplePulseNext){
-      samplePulseNext = now + 0.5;   // 2 chord pulses/sec
-      ['bass','pad','lead'].forEach(k=>{
-        if(voices[k].instr!=='OFF' || voices[k].sampler)
-          playVoice(k, sampleNote[k], 0.85, 0.5, now);
-      });
-    }
-
-    const chordLabel = HUE_NOTES[rootIdx] + qual + (use7?'7':'');
-    $('valTon').innerText = chordLabel;
-    const cube=$('chord-cube');
-    if(cube){
-      cube.innerText = HUE_NOTES[rootIdx];
-      cube.style.background = `hsl(${rootIdx*30},70%,55%)`;
-      $('chord-note').innerText = chordLabel;
-      $('chord-sub').innerText = `hue ${Math.round(mPri.hue)}° · wheel ${Math.round(wheelRotation)}°`;
+  // RHYTHM — edge-driven pulse, sped up by scan
+  {
+    const edgeMod = mPri.edgeDensity * rhythmDepth;
+    const rate = rhythmRate * (0.4 + edgeMod * 2.6) * (1 + scanFactor);
+    const interval = (1 / Math.max(rate, 0.3)) * (0.7 + Math.random() * 0.6);
+    if (now >= rhythmNext) {
+      rhythmNext = now + interval;
+      if (voices.rhythm.instr !== 'OFF' || voices.rhythm.sampler)
+        playVoice('rhythm', noteFromSemis(rootIdx + trans('rhythm'), vOct.rhythm), 0.18, 0.6, now);
     }
   }
+
+  // BASS — edge density drives duration, scan shortens it
+  {
+    const edgeFactor = mPri.edgeDensity;
+    const dur = (0.1 + edgeFactor * 1.5) * (1 - scanFactor * 0.6);
+    if (edgeFactor >= 0.3 && !bassTriggered) {
+      playVoice('bass', noteFromSemis(rootIdx + trans('bass'), vOct.bass), dur, 0.6, now);
+      bassTriggered = true;
+    } else if (edgeFactor < 0.3) {
+      bassTriggered = false;
+    }
+  }
+
+  // PAD — luminance drives velocity
+  {
+    const lumFactor = mPri.luminance;
+    const vel = (0.2 + lumFactor * 0.8) * (1 - scanFactor * 0.5);
+    if (lumFactor >= 0.5 && !padTriggered) {
+      playVoice('pad', noteFromSemis(rootIdx + third + trans('pad'), vOct.pad), 0.9, vel, now);
+      padTriggered = true;
+    } else if (lumFactor < 0.5) {
+      padTriggered = false;
+    }
+  }
+
+  // LEAD — edge density = interval, hue = octave, scan raises threshold
+  {
+    const edgeFactor = mPri.edgeDensity;
+    const hueN = (mPri.hue % 360) / 360;   // hue is DEGREES -> normalize to 0..1
+    const edgeInterval = Math.floor(edgeFactor * 12);
+    const hueOctaveShift = Math.floor(hueN * 3) - 1;
+    const leadNote = noteFromSemis(rootIdx + edgeInterval + trans('lead'), vOct.lead + hueOctaveShift);
+    const threshold = Math.min(0.95, 0.6 * (1 + scanFactor));
+    if (edgeFactor >= threshold && !leadTriggered) {
+      playVoice('lead', leadNote, 0.5, 0.7, now);
+      leadTriggered = true;
+    } else if (edgeFactor < threshold) {
+      leadTriggered = false;
+    }
+  }
+
+  const chordLabel = HUE_NOTES[rootIdx] + qual + (use7 ? '7' : '');
+  $('valTon').innerText = chordLabel;
+  const cube = $('chord-cube');
+  if (cube) {
+    cube.innerText = HUE_NOTES[rootIdx];
+    cube.style.background = `hsl(${rootIdx * 30},70%,55%)`;
+    $('chord-note').innerText = chordLabel;
+    $('chord-sub').innerText = `hue ${Math.round(mPri.hue)}° · wheel ${Math.round(wheelRotation)}°`;
+  }
+}
 
   // CANVAS
   const scanCanvas=$('scan-canvas'), scanCtx=scanCanvas.getContext('2d');
