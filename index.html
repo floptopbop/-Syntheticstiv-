@@ -1182,14 +1182,14 @@
     // plays at half the rhythm rate so it doesn't just double the beat.
     {
       const edgeMod = mPri.edgeDensity*rhythmDepth;
-      const rate = rhythmRate*(0.4+edgeMod*2.6) * 0.5;  // half rate = melodic feel
-      const interval = (1/Math.max(rate,0.15))*(0.7*0.6);
+      const rate = rhythmRate*(0.4+edgeMod*1.6) * 0.5;  // half rate = melodic feel
+      const interval = (1/Math.max(rate,0.2))*(0.7*0.6);
       if(now >= leadPulseNext){
         leadPulseNext = now + interval;
         const edgeInterval = Math.floor(mPri.edgeDensity * 12);
         const leadNote = noteFromSemis(rootIdx + edgeInterval + trans('lead'), vOct.lead);
         if(voices.lead.instr!=='OFF' || voices.lead.sampler)
-          playVoice('lead', leadNote, 0.25, 0.5 + mPri.edgeDensity*0.8, now);
+          playVoice('lead', leadNote, 0.4, 0.4 + mPri.edgeDensity*0.9, now);
       }
     }
 
