@@ -38,22 +38,26 @@
       flex-direction: column;
       height: 100vh;
     }
-    #banner {
-      height: 32px;
-      flex-shrink: 0;
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 10px;
-      z-index: 20;
+#banner {
+  height: 32px;
+  flex-shrink: 0;
+  background: var(--card);
+  border-bottom: 4px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  z-index: 20;
+  /* ADD THIS LINE FOR SMOOTH I/O: */
+  transition: box-shadow 0.05s ease-out, border-color 0.1s ease-out;
+}
+
     }
     .sys-tag {
       font-weight: 700;
       letter-spacing: 0.06em;
       font-size: 9.5px;
-      color: #e4e4e7;
+      color: #2D2C2E;
     }
     .sys-status {
       display: flex;
@@ -80,13 +84,12 @@
       overflow: hidden;
     }
 
-    /* LEFT PANEL (58% width) */
     #left {
-      width: 58%;
-      border-right: 1px solid var(--border);
+      width: 55%;
+      border-right: 4px solid var(--border);
       display: flex;
       flex-direction: column;
-      background: #0c0c0e;
+      background: #110F10;
       overflow-y: auto;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
@@ -97,20 +100,20 @@
       flex-shrink: 0;
     }
     .lbl {
-      font-size: 7.5px;
+      font-size: 8px;
       text-transform: uppercase;
       letter-spacing: 0.09em;
       color: var(--muted);
       font-weight: 700;
       margin-bottom: 6px;
-      line-height: 1.4;
+      line-height: 1;
     }
 
     /* COMPACT VOICE ROW (no transpose) */
     .vrow {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 8px;
       margin-bottom: 7px;
     }
     .vrow:last-child {
@@ -118,11 +121,11 @@
     }
     .vtag {
       flex-shrink: 0;
-      width: 50px;
+      width: 35px;
       line-height: 1.15;
     }
     .vname {
-      font-size: 1px;
+      font-size: 8px;
       font-weight: 700;
       display: block;
       letter-spacing: 0.02em;
@@ -135,7 +138,7 @@
     }
     .ibtn {
       flex-shrink: 0;
-      width: 34px;
+      width: 16px;
       padding: 4px 0;
       text-align: center;
       background: var(--card);
@@ -177,7 +180,7 @@
       font-weight: 700;
     }
     .vrow.off {
-      opacity: 0.35;
+      opacity: 0.45;
     }
     .vrow.off .ibtn {
       opacity: 1;
@@ -187,15 +190,15 @@
     .transpose-row {
       display: flex;
       align-items: center;
-      gap: 4px;
-      margin-bottom: 5px;
+      gap: 8px;
+      margin-bottom: 8px;
     }
     .transpose-row:last-child {
       margin-bottom: 0;
     }
     .tlabel {
       width: 50px;
-      font-size: 7px;
+      font-size: 10px;
       color: var(--muted);
       text-transform: uppercase;
       font-weight: 700;
@@ -212,8 +215,8 @@
     }
     .tsld::-webkit-slider-thumb {
       -webkit-appearance: none;
-      height: 10px;
-      width: 10px;
+      height: 12px;
+      width: 12px;
       border-radius: 50%;
       background: var(--orange);
       cursor: pointer;
@@ -222,7 +225,7 @@
       flex-shrink: 0;
       width: 28px;
       text-align: right;
-      font-size: 7px;
+      font-size: 10px;
       color: var(--orange);
       font-weight: 700;
     }
@@ -235,7 +238,7 @@
     }
     .srow label {
       font-size: 8.5px;
-      color: #a1a1aa;
+      color: #COCOC8;
     }
     .sv {
       font-size: 8.5px;
@@ -256,8 +259,8 @@
     }
     .sld::-webkit-slider-thumb {
       -webkit-appearance: none;
-      height: 11px;
-      width: 11px;
+      height: 14px;
+      width: 14px;
       border-radius: 50%;
       background: var(--blue);
       cursor: pointer;
@@ -336,7 +339,7 @@
     }
     #scan-panel {
       flex: 1;
-      min-height: 0;
+      min-height: justify;
       position: relative;
       background: #080809;
       cursor: pointer;
@@ -383,7 +386,7 @@
       background: #080809;
     }
     .sub-panel canvas {
-      position: absolute;
+      position: flex;
       top: 0;
       left: 0;
       width: 100%;
@@ -391,18 +394,18 @@
       display: block;
     }
     .sub-panel .lbl {
-      position: absolute;
-      top: 3px;
-      left: 6px;
+      position: relative;
+      top: 2px;
+      left: 8px;
       z-index: 10;
       margin: 0;
       pointer-events: none;
-      font-size: 7px;
+      font-size: 8px;
     }
     #img-metrics {
       flex-shrink: 0;
       border-top: 1px solid var(--border);
-      background: #080809;
+      background: #2D2C2E;
       padding: 5px 8px 6px;
       display: none;
     }
@@ -580,11 +583,11 @@
       <div class="panel">
         <div class="lbl">Sonic Core</div>
         <div class="srow"><label>Base Register</label><span class="sv" id="txtFreq">220 Hz</span></div>
-        <input type="range" class="sld" id="sldFreq" min="40" max="880" step="5" value="220">
+        <input type="range" class="sld" id="sldFreq" min="20" max="600" step="5" value="80">
         <div class="srow"><label>Master Gain</label><span class="sv" id="txtGain">0.30</span></div>
         <input type="range" class="sld" id="sldGain" min="0" max="0.85" step="0.05" value="0.3">
         <div class="srow"><label>Scan Speed</label><span class="sv" id="txtSpeed">2.0x</span></div>
-        <input type="range" class="sld" id="sldSpeed" min="0.25" max="10" step="0.25" value="2.0">
+        <input type="range" class="sld" id="sldSpeed" min="0.05" max="4" step="0.05" value="1.0">
         <div class="srow"><label>Wheel Rotation</label><span class="sv" id="txtWheel">0°</span></div>
         <input type="range" class="sld" id="sldWheel" min="0" max="360" step="1" value="0">
       </div>
@@ -648,7 +651,7 @@
         </div>
       </div>
       <div id="img-metrics">
-        <div class="lbl">IMAGE GLOBALS · influences composition</div>
+        <div class="lbl">IMAGE GLOBALS · </div>
         <div class="met-grid">
           <div class="met-cell">
             <span class="met-k">BRIGHTNESS</span>
@@ -731,8 +734,8 @@
   const VLEVEL = { bass:1, pad:1, lead:1, rhythm:1 };
   const VINSTR  = { bass:'SIN', pad:'SIN', lead:'SAW', rhythm:'SQR' };
   const VTRANS  = { bass:0, pad:0, lead:0, rhythm:0 };
-  let scanMode = 'V', scaleMode = 'AUTO', baseFreq = 220, speedMul = 2.0;
-  let rhythmRate = 8, rhythmDepth = 1.0, isPlaying = false;
+  let scanMode = 'V', scaleMode = 'AUTO', baseFreq = 80, speedMul = 2.0;
+  let rhythmRate = 4, rhythmDepth = 0.2, isPlaying = false;
   let loadedImage = null, imgRect = null, lastRoot = 0;
   let wheelRotation = 0;
   let bassTriggered = false, padTriggered = false, leadTriggered = false; // per-voice gate state
@@ -1244,8 +1247,8 @@
     const cw=scanCanvas.width,ch=scanCanvas.height;
     scanCtx.fillStyle='#080809'; scanCtx.fillRect(0,0,cw,ch);
     if(!loadedImage) return;
-    const r=imgRect; scanCtx.drawImage(loadedImage,r.x,r.y,r.w,r.h);
-    if((scanMode==='V'||scanMode==='DUAL')&&compV.length) {
+    const r=imgRect; scanCtx.clearRect(0, 0, scanCanvas.width, scanCanvas.height);
+scanCtx.drawImage(loadedImage, r.x, r.y, r.w, r.h);    if((scanMode==='V'||scanMode==='DUAL')&&compV.length) {
       const sy=r.y+(idxV/compV.length)*r.h;
       scanCtx.save(); scanCtx.strokeStyle='rgba(255,230,0,0.20)'; scanCtx.lineWidth=7;
       scanCtx.beginPath(); scanCtx.moveTo(r.x,sy); scanCtx.lineTo(r.x+r.w,sy); scanCtx.stroke();
