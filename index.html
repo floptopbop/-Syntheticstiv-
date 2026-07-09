@@ -7,16 +7,16 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
   <style>
     :root {
-      --bg: #09090b;
+      --bg: #121016;
       --card: #141417;
       --border: #27272a;
-      --muted: #71717a;
+      --muted: #717E86;
       --bright: #f4f4f5;
-      --blue: #3b82f6;
+      --blue: #6492BE;
       --green: #10b981;
       --yellow: #ffe600;
-      --pink: #ff00ea;
-      --orange: #f59e0b;
+      --pink: #E87A87;
+      --orange: #FF987D;
     }
     * {
       box-sizing: border-box;
@@ -122,7 +122,7 @@
       line-height: 1.15;
     }
     .vname {
-      font-size: 8.5px;
+      font-size: 1px;
       font-weight: 700;
       display: block;
       letter-spacing: 0.02em;
@@ -399,11 +399,71 @@
       pointer-events: none;
       font-size: 7px;
     }
+    #img-metrics {
+      flex-shrink: 0;
+      border-top: 1px solid var(--border);
+      background: #080809;
+      padding: 5px 8px 6px;
+      display: none;
+    }
+    #img-metrics.visible { display: block; }
+    #img-metrics .lbl { margin-bottom: 5px; }
+    .met-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 3px;
+    }
+    .met-cell {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 3px 4px;
+    }
+    .met-k {
+      font-size: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 1px;
+    }
+    .met-v {
+      font-size: 8.5px;
+      font-weight: 700;
+      color: var(--blue);
+    }
+    .met-bar {
+      height: 2px;
+      background: var(--border);
+      margin-top: 3px;
+      border-radius: 1px;
+      overflow: hidden;
+    }
+    .met-fill {
+      height: 100%;
+      border-radius: 1px;
+      transition: width 0.4s ease;
+    }
+    .met-influence {
+      font-size: 6.5px;
+      color: var(--muted);
+      margin-top: 4px;
+      letter-spacing: 0.04em;
+    }
+    .met-influence b { color: var(--yellow); font-weight: 700; }
     #osc-panel {
       height: 58px;
     }
+    #spec-panel {
+      height: 50px;
+    }
     #dens-panel {
       height: 44px;
+    }
+    #btnRec.recording {
+      background: var(--pink);
+      border-color: var(--pink);
+      color: #fff;
     }
 
     #status {
@@ -547,6 +607,7 @@
         </div>
         <div class="brow" style="margin-bottom:5px;">
           <button class="btn" id="btnScale">SCALE: AUTO</button>
+          <button class="btn" id="btnRec">● REC</button>
         </div>
         <div class="brow">
           <button class="btn active" id="btnScanV">SCAN V</button>
@@ -586,9 +647,59 @@
           <input type="file" id="fileIn" accept="image/*" hidden>
         </div>
       </div>
+      <div id="img-metrics">
+        <div class="lbl">IMAGE GLOBALS · influences composition</div>
+        <div class="met-grid">
+          <div class="met-cell">
+            <span class="met-k">BRIGHTNESS</span>
+            <span class="met-v" id="mg-bright">—</span>
+            <div class="met-bar"><div class="met-fill" id="mb-bright" style="background:var(--blue);width:0%"></div></div>
+          </div>
+          <div class="met-cell">
+            <span class="met-k">CONTRAST</span>
+            <span class="met-v" id="mg-contrast">—</span>
+            <div class="met-bar"><div class="met-fill" id="mb-contrast" style="background:var(--orange);width:0%"></div></div>
+          </div>
+          <div class="met-cell">
+            <span class="met-k">SATURATION</span>
+            <span class="met-v" id="mg-sat">—</span>
+            <div class="met-bar"><div class="met-fill" id="mb-sat" style="background:var(--green);width:0%"></div></div>
+          </div>
+          <div class="met-cell">
+            <span class="met-k">EDGE DENS</span>
+            <span class="met-v" id="mg-edge">—</span>
+            <div class="met-bar"><div class="met-fill" id="mb-edge" style="background:var(--yellow);width:0%"></div></div>
+          </div>
+          <div class="met-cell">
+            <span class="met-k">WARM/COOL</span>
+            <span class="met-v" id="mg-temp">—</span>
+            <div class="met-bar"><div class="met-fill" id="mb-temp" style="background:var(--pink);width:0%"></div></div>
+          </div>
+          <div class="met-cell">
+            <span class="met-k">COMPLEXITY</span>
+            <span class="met-v" id="mg-complex">—</span>
+            <div class="met-bar"><div class="met-fill" id="mb-complex" style="background:#a78bfa;width:0%"></div></div>
+          </div>
+          <div class="met-cell">
+            <span class="met-k">DOMINANT HUE</span>
+            <span class="met-v" id="mg-hue">—</span>
+            <div class="met-bar"><div class="met-fill" id="mb-hue" style="background:var(--blue);width:0%"></div></div>
+          </div>
+          <div class="met-cell">
+            <span class="met-k">SCALE BIAS</span>
+            <span class="met-v" id="mg-scale">—</span>
+            <div class="met-bar"><div class="met-fill" id="mb-scale" style="background:var(--green);width:0%"></div></div>
+          </div>
+        </div>
+        <div class="met-influence" id="met-influence-txt"></div>
+      </div>
       <div class="sub-panel" id="osc-panel">
         <div class="lbl">OSCILLOSCOPE</div>
         <canvas id="osc-canvas"></canvas>
+      </div>
+      <div class="sub-panel" id="spec-panel">
+        <div class="lbl">SPECTRUM</div>
+        <canvas id="spec-canvas"></canvas>
       </div>
       <div class="sub-panel" id="dens-panel">
         <div class="lbl">EDGE DENSITY MAP</div>
@@ -624,9 +735,11 @@
   let rhythmRate = 8, rhythmDepth = 1.0, isPlaying = false;
   let loadedImage = null, imgRect = null, lastRoot = 0;
   let wheelRotation = 0;
+  let bassTriggered = false, padTriggered = false, leadTriggered = false; // per-voice gate state
   // one Tone engine; each voice holds its own synth + optional sampler
-  let toneStarted = false, samplePulseNext = 0;
+  let toneStarted = false, samplePulseNext = 0, leadPulseNext = 0;
   const sampleNote = { bass:'C2', pad:'C4', lead:'C5', rhythm:'C3' }; // current note per voice
+  const heldNote = { bass:null, pad:null, lead:null };                // sustained note per tonal voice
 
   const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
   const lerp = (a,b,t) => a+(b-a)*clamp(t,0,1);
@@ -666,18 +779,37 @@
         setStatus(`${key.toUpperCase()} sample ready: ${file.name}`,'ok');
       }});
       s.connect(v.vol);
-      v.sampler = s;
+      v.sampler = s; if(key in heldNote) heldNote[key]=null;
       setTimeout(()=>{ if(!done && voices[key].sampler===s){ setStatus(`${key.toUpperCase()}: couldn\u2019t decode ${file.name} — try WAV or MP3.`,'wrn'); } }, 4000);
     }catch(err){ console.error(err); setStatus('Could not load that audio file.','wrn'); }
   }
 
   function clearSample(key){
     const v=voices[key];
-    if (v && v.sampler){ try{v.sampler.dispose();}catch(e){} v.sampler=null; }
+    if (v && v.sampler){ try{v.sampler.dispose();}catch(e){} v.sampler=null; } if(key in heldNote) heldNote[key]=null;
     const b=$('smp-'+key); b.classList.remove('loaded');
     const defs={bass:'Root',pad:'Third',lead:'Fifth/7th',rhythm:'Root puls'};
     $('src-'+key).innerText = defs[key];
     setStatus(`${key.toUpperCase()} back to synth.`,'inf');
+  }
+
+  // Record the master output to a downloadable .webm
+  async function toggleRecording(){
+    if(!audioRecorder){ setStatus('Engage the engine first, then record.','wrn'); return; }
+    const btn=$('btnRec');
+    if(!isRecording){
+      audioRecorder.start(); isRecording=true;
+      if(btn){ btn.innerText='● STOP REC'; btn.classList.add('recording'); }
+      setStatus('Recording master output…','live');
+    } else {
+      const blob = await audioRecorder.stop(); isRecording=false;
+      if(btn){ btn.innerText='● REC'; btn.classList.remove('recording'); }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.download = `axiom_${Date.now()}.webm`; a.href = url; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url), 1000);
+      setStatus('Recording saved (.webm).','ok');
+    }
   }
 
   function setStatus(msg, type='inf') {
@@ -695,12 +827,138 @@
     const { data, width:W, height:H } = cx.getImageData(0,0,oc.width,oc.height);
     const gray = new Float32Array(W*H);
     for (let i=0;i<gray.length;i++) { const j=i*4; gray[i]=0.299*data[j]+0.587*data[j+1]+0.114*data[j+2]; }
+    // compute global stats first and apply to composition
+    applyGlobalStats(computeGlobalStats(data, W, H));
     compV = []; compH = [];
     for (let y=0; y<H; y+=RES) compV.push(extractRow(data,gray,W,H,y));
     for (let x=0; x<W; x+=RES) compH.push(extractCol(data,gray,W,H,x));
     idxV = 0; idxH = 0;
     setStatus(`${compV.length} rows · ${compH.length} cols analyzed.`,'ok');
     renderDensity();
+  }
+
+  // GLOBAL IMAGE STATS — computed once on load, held here
+  let imgGlobals = null;
+
+  function computeGlobalStats(data, W, H) {
+    let sumL=0, sumR=0, sumG=0, sumB=0, sumSat=0, edgeCount=0, totalPx=0;
+    let hueX=0, hueY=0, hueTotal=0;
+    const step = 4; // sample every 4th pixel for speed
+    for (let y=step; y<H-step; y+=step) {
+      for (let x=step; x<W-step; x+=step) {
+        const i=(y*W+x)*4;
+        const r=data[i],g=data[i+1],b=data[i+2];
+        const lum=(r+g+b)/3;
+        sumL+=lum; sumR+=r; sumG+=g; sumB+=b; totalPx++;
+        const mx=Math.max(r,g,b),mn=Math.min(r,g,b),dl=mx-mn;
+        const sat = mx===0?0:dl/mx; sumSat+=sat;
+        // hue accumulation (circular mean)
+        if(sat>0.15&&mx>25){
+          let hh=0;
+          if(dl===0){}
+          else if(mx===r) hh=((g-b)/dl*60+360)%360;
+          else if(mx===g) hh=(b-r)/dl*60+120;
+          else             hh=(r-g)/dl*60+240;
+          hueX+=Math.cos(hh*Math.PI/180); hueY+=Math.sin(hh*Math.PI/180); hueTotal++;
+        }
+        // basic edge proxy: local contrast
+        const i2=(y*W+(x+step))*4;
+        const lum2=(data[i2]+data[i2+1]+data[i2+2])/3;
+        if(Math.abs(lum-lum2)>30) edgeCount++;
+      }
+    }
+    const brightness = (sumL/totalPx)/255;
+    const avgR=(sumR/totalPx)/255, avgB=(sumB/totalPx)/255;
+    const saturation = sumSat/totalPx;
+    const edgeDensity = edgeCount/totalPx;
+    const warmCool = clamp((avgR-avgB+1)/2,0,1); // 0=cool,1=warm
+    // dominant hue from circular mean
+    let domHueDeg = 0, domHueStr = 0;
+    if(hueTotal>0){
+      domHueDeg = (Math.atan2(hueY/hueTotal, hueX/hueTotal)*180/Math.PI+360)%360;
+      domHueStr = Math.sqrt((hueX/hueTotal)**2+(hueY/hueTotal)**2);
+    }
+    // variance across rows = complexity proxy
+    const rowBrightness=[];
+    for(let y=0;y<H;y+=step){
+      let rs=0,rc=0;
+      for(let x=0;x<W;x+=step){const i=(y*W+x)*4;rs+=(data[i]+data[i+1]+data[i+2])/3;rc++;}
+      rowBrightness.push(rs/rc/255);
+    }
+    const mean=rowBrightness.reduce((a,b)=>a+b,0)/rowBrightness.length;
+    const variance=rowBrightness.reduce((a,v)=>a+(v-mean)**2,0)/rowBrightness.length;
+    const complexity = clamp(Math.sqrt(variance)*4,0,1);
+
+    // scale bias: warm+bright → major, cool+dark → minor, high edge → dissonant
+    let scaleBias;
+    if(edgeDensity>0.25) scaleBias='DISSONANT';
+    else if(warmCool>0.55&&brightness>0.45) scaleBias='MAJOR';
+    else if(warmCool<0.45||brightness<0.4) scaleBias='MINOR';
+    else scaleBias='AUTO';
+
+    return { brightness, saturation, edgeDensity, warmCool, complexity, domHueDeg, domHueStr, scaleBias };
+  }
+
+  function applyGlobalStats(g) {
+    imgGlobals = g;
+
+    // show panel
+    document.getElementById('img-metrics').classList.add('visible');
+
+    const fmt = v => (v*100).toFixed(0)+'%';
+    const setMet = (id,val,pct) => {
+      document.getElementById('mg-'+id).innerText = fmt(val);
+      document.getElementById('mb-'+id).style.width = (pct*100).toFixed(1)+'%';
+    };
+
+    setMet('bright',   g.brightness,   g.brightness);
+    setMet('contrast', g.complexity,   g.complexity);
+    setMet('sat',      g.saturation,   g.saturation);
+    setMet('edge',     g.edgeDensity,  g.edgeDensity);
+    setMet('temp',     g.warmCool,     g.warmCool);
+    setMet('complex',  g.complexity,   g.complexity);
+
+    // dominant hue
+    const hueNote = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'][Math.round(g.domHueDeg/30)%12];
+    document.getElementById('mg-hue').innerText = hueNote + ' ' + Math.round(g.domHueDeg)+'°';
+    document.getElementById('mb-hue').style.width = (g.domHueDeg/360*100).toFixed(1)+'%';
+    document.getElementById('mb-hue').style.background = `hsl(${g.domHueDeg},70%,55%)`;
+
+    document.getElementById('mg-scale').innerText = g.scaleBias;
+    document.getElementById('mb-scale').style.width = g.saturation*100+'%';
+
+    // influence text
+    const lines = [
+      `SCALE → <b>${g.scaleBias}</b>`,
+      `RHYT RATE → <b>${(8*(0.5+g.edgeDensity)).toFixed(1)} Hz</b>`,
+      `BASE FREQ → <b>${Math.round(lerp(110,440,g.brightness))} Hz</b>`,
+      `PAD GAIN → <b>${lerp(0.5,1.5,g.saturation).toFixed(2)}</b>`,
+    ];
+    document.getElementById('met-influence-txt').innerHTML = lines.join(' · ');
+
+    // — AUTO-APPLY influences to sliders & state —
+
+    // 1. Scale: push scaleMode to image-derived bias (only if still AUTO)
+    if(scaleMode==='AUTO'){ scaleMode=g.scaleBias; $('btnScale').innerText='SCALE: '+g.scaleBias; }
+
+    // 2. Base frequency: brightness maps to register (dark=low, bright=high)
+    const newFreq = Math.round(lerp(110,440,g.brightness));
+    baseFreq = newFreq;
+    $('sldFreq').value = newFreq; $('txtFreq').innerText = newFreq+' Hz';
+
+    // 3. Rhythm rate: edge density drives base rhythm speed
+    const newRate = parseFloat((rhythmRate*(0.5+g.edgeDensity*1.5)).toFixed(1));
+    rhythmRate = clamp(newRate,0.5,20);
+    $('sldRate').value = rhythmRate; $('txtRate').innerText = rhythmRate.toFixed(1)+' Hz';
+
+    // 4. PAD gain: saturation → harmonic richness
+    const padGain = clamp(lerp(0.5,1.5,g.saturation),0,2);
+    VLEVEL.pad = padGain;
+    $('vl-pad').value = padGain; $('vv-pad').innerText = padGain.toFixed(2);
+
+    // 5. Wheel rotation: dominant hue offsets the color wheel for root mapping
+    wheelRotation = g.domHueDeg > 0 ? g.domHueDeg : 0;
+    $('sldWheel').value = wheelRotation; $('txtWheel').innerText = Math.round(wheelRotation)+'°';
   }
 
   function sobelEdge(gray,W,H,x,y) {
@@ -796,7 +1054,8 @@
   // synth or a loaded Tone.Sampler. Same trigger path, one context, one clock.
   // ============================================================
   const SYNTH_OSC = { SIN:'sine', SAW:'sawtooth', SQR:'square', TRI:'triangle', FAT:'fatsawtooth', NOISE:'noise' };
-  let toneAnalyser = null;
+  let toneAnalyser = null, specAnalyser = null;
+  let audioRecorder = null, isRecording = false;
 
   function initAudio() {
     if (typeof Tone === 'undefined') { setStatus('Tone.js not loaded — check connection.','wrn'); return; }
@@ -804,10 +1063,15 @@
     masterGain = new Tone.Gain(parseFloat($('sldGain').value));
     const limiter = new Tone.Limiter(-2);
     toneAnalyser = new Tone.Analyser('waveform', 1024);
+    specAnalyser = new Tone.Analyser('fft', 64);
     masterGain.connect(limiter); limiter.toDestination();
     masterGain.connect(toneAnalyser);
+    masterGain.connect(specAnalyser);
+    // Everything through master also feeds the recorder
+    audioRecorder = new Tone.Recorder();
+    masterGain.connect(audioRecorder);
     VKEYS.forEach(key => {
-      const vol = new Tone.Gain(1).connect(masterGain);
+      const vol = new Tone.Gain(1).connect(masterGain);   // straight to master, no FX
       voices[key] = { synth:null, sampler:null, vol, instr:VINSTR[key], levelMul:VLEVEL[key] };
       buildSynth(key);
     });
@@ -818,6 +1082,7 @@
   // build (or rebuild) a voice's synth from its instrument type
   function buildSynth(key) {
     const v=voices[key]; if(!v) return;
+    if(key in heldNote) heldNote[key]=null;
     if(v.synth){ try{v.synth.dispose();}catch(e){} v.synth=null; }
     if(v.instr==='OFF') return;
     if(v.instr==='NOISE'){
@@ -851,6 +1116,29 @@
       try{ if(v.synth&&v.synth.releaseAll) v.synth.releaseAll(); }catch(e){}
       try{ if(v.sampler&&v.sampler.releaseAll) v.sampler.releaseAll(); }catch(e){}
     });
+    heldNote.bass=heldNote.pad=heldNote.lead=null;
+  }
+
+  // Sustained voice: holds its note and only re-attacks when the note CHANGES.
+  // This is what keeps bass/pad/lead off the pulse — they glide with the scan.
+  function holdVoice(key, note, vel, time){
+    const v=voices[key]; if(!v) return;
+    const level = clamp((v.levelMul!=null?v.levelMul:1), 0, 2);
+    try{ v.vol.gain.rampTo(level, 0.03); }catch(e){}
+    if(note===heldNote[key]) return;                 // already holding it — sustain
+    if(heldNote[key]!=null){                          // release the old note first
+      try{
+        if(v.sampler) v.sampler.triggerRelease(heldNote[key], time);
+        else if(v.synth && v.instr!=='NOISE') v.synth.triggerRelease(heldNote[key], time);
+      }catch(e){}
+    }
+    heldNote[key]=note;
+    if(!v.sampler && v.instr==='OFF') return;         // nothing to sound
+    try{
+      if(v.sampler) v.sampler.triggerAttack(note, time, clamp(vel*0.9,0,1));
+      else if(v.instr==='NOISE') v.synth.triggerAttack(time, clamp(vel,0,1));
+      else if(v.synth) v.synth.triggerAttack(note, time, clamp(vel,0,1));
+    }catch(e){}
   }
 
   // Called every frame with the current scan metrics. Builds one chord and
@@ -861,7 +1149,7 @@
 
     const bright = mPri.luminance, sat = mPri.saturation, vivid = mPri.hueStr;
     // hue -> root (wheel rotation transposes); hold last root through grey
-    const rootIdx = vivid > 0.02 ? hueToNote(mPri.hue + wheelRotation) : lastRoot;
+    const rootIdx = vivid > 0.05 ? hueToNote(mPri.hue + wheelRotation) : lastRoot;
     lastRoot = rootIdx;
 
     let third, qual;
@@ -869,38 +1157,58 @@
     else if (scaleMode==='MINOR')     { third=3; qual='m'; }
     else if (scaleMode==='DISSONANT') { third=6; qual='(b5)'; }
     else if (sat < 0.14)              { third=7; qual='5'; }
-    else if (bright >= 0.5)           { third=4; qual=''; }
+    else if (bright >= 0.2)           { third=4; qual=''; }
     else                              { third=3; qual='m'; }
-    const use7 = sat > 0.45 && third!==7;
-    const seventh = bright >= 0.6 ? 11 : 10;
-    const fifth = 7;
+    const use7 = sat > 0.1 && third!==7;
     const trans = k => VTRANS[k]||0;
-
-    const topInt = use7 ? seventh : fifth;
-    const vInt = { bass:0, pad:third, lead:topInt, rhythm:0 };
-    const vOct = { bass:-1, pad:0, lead:1, rhythm:-1 };
-    VKEYS.forEach(k=>{ sampleNote[k] = noteFromSemis(rootIdx + vInt[k] + trans(k), vOct[k]); });
+    // lead is now 0 (was +1) so it sits straight, no octave stacking
+    const vOct = { bass:0, pad:0, lead:0, rhythm:1 };
 
     const now = Tone.now();
 
-    // RHYTHM voice — its own edge-driven pulse
+    // RHYTHM — edge-driven pulse clock.
     {
       const edgeMod = mPri.edgeDensity*rhythmDepth;
       const rate = rhythmRate*(0.4+edgeMod*2.6);
-      const interval = (1/Math.max(rate,0.3))*(0.7+.6);
+      const interval = (1/Math.max(rate,0.3))*(0.7*0.6);
       if(now >= rhythmNext){
         rhythmNext = now + interval;
         if(voices.rhythm.instr!=='OFF' || voices.rhythm.sampler)
-          playVoice('rhythm', sampleNote.rhythm, 0.18, 0.6, now);
+          playVoice('rhythm', noteFromSemis(rootIdx + trans('rhythm'), vOct.rhythm), 0.18, 0.5, now);
       }
     }
 
-    // BASS/PAD/LEAD — steady chord pulse so they sustain and follow the scan
-    if(now >= samplePulseNext){
-      samplePulseNext = now;         ['bass','pad','lead'].forEach(k=>{
-        if(voices[k].instr!=='OFF' || voices[k].sampler)
-          playVoice(k, sampleNote[k], 0.85, 0.2, now);
-      });
+    // LEAD — same clock as rhythm but melodic: edge density picks the scale interval,
+    // plays at half the rhythm rate so it doesn't just double the beat.
+    {
+      const edgeMod = mPri.edgeDensity*rhythmDepth;
+      const rate = rhythmRate*(0.4+edgeMod*2.6) * 0.5;  // half rate = melodic feel
+      const interval = (1/Math.max(rate,0.15))*(0.7*0.6);
+      if(now >= leadPulseNext){
+        leadPulseNext = now + interval;
+        const edgeInterval = Math.floor(mPri.edgeDensity * 12);
+        const leadNote = noteFromSemis(rootIdx + edgeInterval + trans('lead'), vOct.lead);
+        if(voices.lead.instr!=='OFF' || voices.lead.sampler)
+          playVoice('lead', leadNote, 0.25, 0.5 + mPri.edgeDensity*0.8, now);
+      }
+    }
+
+    // BASS — driven by SATURATION gate. Lower threshold so it actually fires.
+    {
+      const f = sat;
+      if(f >= 0.1 && !bassTriggered){
+        playVoice('bass', noteFromSemis(rootIdx + trans('bass'), vOct.bass), 0.15 + f*0.8, 0.5 + f*0.4, now);
+        bassTriggered = true;
+      } else if(f < 0.9){ bassTriggered = false; }
+    }
+
+    // PAD — driven by LUMINANCE gate. Lowered threshold.
+    {
+      const f = bright;
+      if(f >= 0.2 && !padTriggered){
+        playVoice('pad', noteFromSemis(rootIdx + third + trans('pad'), vOct.pad), 0.8, 0.1 + f*0.7, now);
+        padTriggered = true;
+      } else if(f < 0.8){ padTriggered = false; }
     }
 
     const chordLabel = HUE_NOTES[rootIdx] + qual + (use7?'7':'');
@@ -917,10 +1225,11 @@
   // CANVAS
   const scanCanvas=$('scan-canvas'), scanCtx=scanCanvas.getContext('2d');
   const oscCanvas=$('osc-canvas'), oscCtx=oscCanvas.getContext('2d');
+  const specCanvas=$('spec-canvas'), specCtx=specCanvas.getContext('2d');
   const densCanvas=$('dens-canvas'), densCtx=densCanvas.getContext('2d');
 
   function resizeAll() {
-    [scanCanvas,oscCanvas,densCanvas].forEach(c=>{c.width=c.clientWidth||1;c.height=c.clientHeight||1;});
+    [scanCanvas,oscCanvas,specCanvas,densCanvas].forEach(c=>{c.width=c.clientWidth||1;c.height=c.clientHeight||1;});
     if(loadedImage) computeRect();
     renderScan(); renderDensity();
   }
@@ -963,6 +1272,24 @@
       oscCtx.stroke();
     } else {
       oscCtx.strokeStyle='rgba(59,130,246,0.12)'; oscCtx.beginPath(); oscCtx.moveTo(0,h/2); oscCtx.lineTo(w,h/2); oscCtx.stroke();
+    }
+  }
+  function renderSpectrum() {
+    const w=specCanvas.width,h=specCanvas.height;
+    specCtx.fillStyle='#060608'; specCtx.fillRect(0,0,w,h);
+    if(specAnalyser&&isPlaying){
+      const buf=specAnalyser.getValue();          // Float32Array of dB
+      const n=buf.length, bw=w/n;
+      for(let i=0;i<n;i++){
+        const v=clamp((buf[i]+100)/100,0,1);      // -100dB..0dB -> 0..1
+        const bh=v*h;
+        const hue=(210 - (i/n)*260 + 360)%360;    // low=blue -> high=pink
+        specCtx.fillStyle=`hsl(${hue},80%,${20+v*45}%)`;
+        specCtx.fillRect(i*bw, h-bh, bw+0.5, bh);
+      }
+    } else {
+      specCtx.strokeStyle='rgba(59,130,246,0.12)'; specCtx.beginPath();
+      specCtx.moveTo(0,h-1); specCtx.lineTo(w,h-1); specCtx.stroke();
     }
   }
   function renderDensity() {
@@ -1017,7 +1344,7 @@
       if(!audioCtx) initAudio();
       if(audioCtx.state==='suspended'){ try{ await audioCtx.resume(); }catch(e){} }
       const now=Tone.now();
-      samplePulseNext = now; rhythmNext = now;
+      samplePulseNext = now; rhythmNext = now; leadPulseNext = now;
       isPlaying=true;
       this.innerText='■ TERMINATE'; this.classList.add('active');
       $('sdot').classList.add('live'); $('stxt').innerText='SYS_ACTIVE';
@@ -1040,6 +1367,7 @@
     scaleMode=m[(m.indexOf(scaleMode)+1)%m.length];
     this.innerText=`SCALE: ${scaleMode}`; setStatus(`Scale: ${scaleMode}`,'inf');
   });
+  $('btnRec').addEventListener('click',()=>toggleRecording());
   function setScanMode(mode){
     scanMode=mode; idxV=0; idxH=0;
     ['btnScanV','btnScanH','btnScanD'].forEach(id=>$(id).classList.remove('active'));
@@ -1104,7 +1432,7 @@
       if(scanMode!=='H'&&compV.length){idxV+=speedMul;if(idxV>=compV.length)idxV=0;}
       if(scanMode!=='V'&&compH.length){idxH+=speedMul;if(idxH>=compH.length)idxH=0;}
     }
-    renderScan(); renderOsc(); renderDensity();
+    renderScan(); renderOsc(); renderSpectrum(); renderDensity();
     requestAnimationFrame(mainLoop);
   }
 
