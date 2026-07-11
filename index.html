@@ -15,7 +15,7 @@
       --blue: #6492BE;
       --green: #10b981;
       --yellow: #ffe600;
-      --pink: #E87A87;
+      --pink: #E7C8DD;
       --orange: #FF987D;
     }
     * {
@@ -51,8 +51,6 @@
   /* ADD THIS LINE FOR SMOOTH I/O: */
   transition: box-shadow 0.05s ease-out, border-color 0.1s ease-out;
 }
-
-    }
     .sys-tag {
       font-weight: 700;
       letter-spacing: 0.06em;
@@ -238,7 +236,7 @@
     }
     .srow label {
       font-size: 8.5px;
-      color: #COCOC8;
+      color: #c0c0c8;
     }
     .sv {
       font-size: 8.5px;
@@ -339,7 +337,7 @@
     }
     #scan-panel {
       flex: 1;
-      min-height: justify;
+      min-height: 0;
       position: relative;
       background: #080809;
       cursor: pointer;
@@ -386,7 +384,7 @@
       background: #080809;
     }
     .sub-panel canvas {
-      position: flex;
+      position: absolute;
       top: 0;
       left: 0;
       width: 100%;
@@ -394,7 +392,7 @@
       display: block;
     }
     .sub-panel .lbl {
-      position: relative;
+      position: absolute;
       top: 2px;
       left: 8px;
       z-index: 10;
@@ -492,7 +490,10 @@
     #status.ok  .stag { color: var(--green); }
     #status.live .stag { color: var(--yellow); }
   .ibtn.smpbtn { color: var(--muted); border-color: var(--border); }
-  .ibtn.smpbtn.loaded { color: var(--pink); border-color: var(--pink); }
+  .ibtn.smpbtn.loaded { color:#0a0a0c; border-color:var(--pink); background:var(--pink);
+    box-shadow:0 0 7px rgba(231,200,221,0.55); }
+  .ibtn.smpbtn.loading { color:var(--yellow); border-color:var(--yellow); opacity:0.7; }
+  .ibtn.smpbtn.loading::after { content:''; }
   #chord-bar { flex-shrink:0; display:flex; align-items:center; gap:9px; padding:7px 9px;
     background:#0c0c0e; border-bottom:1px solid var(--border); }
   #chord-cube { width:46px; height:46px; flex-shrink:0; border-radius:5px; border:1px solid var(--border);
@@ -526,7 +527,7 @@
           <button class="ibtn smpbtn" id="smp-bass">SMP</button>
           <input type="range" class="vlvl" id="vl-bass" min="0" max="2" step="0.05" value="1">
           <span class="vv" id="vv-bass">1.00</span>
-          <input type="file" id="file-bass" accept="audio/*" hidden>
+          <input type="file" id="file-bass" accept="audio/*,.wav,.mp3,.m4a,.aac,.ogg,.oga,.opus,.flac,.aif,.aiff" hidden>
         </div>
         <div class="vrow" id="vr-pad">
           <div class="vtag"><span class="vname" style="color:#10b981">V2 PAD</span><span class="vsrc" id="src-pad">Third</span></div>
@@ -534,7 +535,7 @@
           <button class="ibtn smpbtn" id="smp-pad">SMP</button>
           <input type="range" class="vlvl" id="vl-pad" min="0" max="2" step="0.05" value="1">
           <span class="vv" id="vv-pad">1.00</span>
-          <input type="file" id="file-pad" accept="audio/*" hidden>
+          <input type="file" id="file-pad" accept="audio/*,.wav,.mp3,.m4a,.aac,.ogg,.oga,.opus,.flac,.aif,.aiff" hidden>
         </div>
         <div class="vrow" id="vr-lead">
           <div class="vtag"><span class="vname" style="color:#f59e0b">V3 LEAD</span><span class="vsrc" id="src-lead">Fifth/7th</span></div>
@@ -542,7 +543,7 @@
           <button class="ibtn smpbtn" id="smp-lead">SMP</button>
           <input type="range" class="vlvl" id="vl-lead" min="0" max="2" step="0.05" value="1">
           <span class="vv" id="vv-lead">1.00</span>
-          <input type="file" id="file-lead" accept="audio/*" hidden>
+          <input type="file" id="file-lead" accept="audio/*,.wav,.mp3,.m4a,.aac,.ogg,.oga,.opus,.flac,.aif,.aiff" hidden>
         </div>
         <div class="vrow" id="vr-rhythm">
           <div class="vtag"><span class="vname" style="color:#ffe600">V4 RHYT</span><span class="vsrc" id="src-rhythm">Root puls</span></div>
@@ -550,7 +551,7 @@
           <button class="ibtn smpbtn" id="smp-rhythm">SMP</button>
           <input type="range" class="vlvl" id="vl-rhythm" min="0" max="2" step="0.05" value="1">
           <span class="vv" id="vv-rhythm">1.00</span>
-          <input type="file" id="file-rhythm" accept="audio/*" hidden>
+          <input type="file" id="file-rhythm" accept="audio/*,.wav,.mp3,.m4a,.aac,.ogg,.oga,.opus,.flac,.aif,.aiff" hidden>
         </div>
       </div>
 
@@ -583,10 +584,10 @@
       <div class="panel">
         <div class="lbl">Sonic Core</div>
         <div class="srow"><label>Base Register</label><span class="sv" id="txtFreq">220 Hz</span></div>
-        <input type="range" class="sld" id="sldFreq" min="20" max="600" step="5" value="80">
+        <input type="range" class="sld" id="sldFreq" min="55" max="440" step="5" value="220">
         <div class="srow"><label>Master Gain</label><span class="sv" id="txtGain">0.30</span></div>
         <input type="range" class="sld" id="sldGain" min="0" max="0.85" step="0.05" value="0.3">
-        <div class="srow"><label>Scan Speed</label><span class="sv" id="txtSpeed">2.0x</span></div>
+        <div class="srow"><label>Scan Speed</label><span class="sv" id="txtSpeed">1.00x</span></div>
         <input type="range" class="sld" id="sldSpeed" min="0.05" max="4" step="0.05" value="1.0">
         <div class="srow"><label>Wheel Rotation</label><span class="sv" id="txtWheel">0°</span></div>
         <input type="range" class="sld" id="sldWheel" min="0" max="360" step="1" value="0">
@@ -734,8 +735,23 @@
   const VLEVEL = { bass:1, pad:1, lead:1, rhythm:1 };
   const VINSTR  = { bass:'SIN', pad:'SIN', lead:'SAW', rhythm:'SQR' };
   const VTRANS  = { bass:0, pad:0, lead:0, rhythm:0 };
-  let scanMode = 'V', scaleMode = 'AUTO', baseFreq = 80, speedMul = 2.0;
-  let rhythmRate = 4, rhythmDepth = 0.2, isPlaying = false;
+  let scanMode = 'V', scaleMode = 'AUTO', baseFreq = 220, speedMul = 1.0;
+  let rhythmRate = 8, rhythmDepth = 1.0, isPlaying = false;
+  let rhythmRateBase = 8;   // untouched user value; auto-apply derives from this, never compounds
+
+  // ---- PITCH WINDOWS -------------------------------------------------------
+  // Synths can roam. Samplers cannot: Tone.Sampler pitch-shifts by playbackRate
+  // from its C4 root, so C1 = 0.125x and C7 = 8x — inaudible or ultrasonic.
+  // Notes are FOLDED by octave into these windows, not clamped, so pitch keeps
+  // moving with the scan instead of pinning to a rail.
+  const SYNTH_RANGE   = { bass:[28,52], pad:[48,72], lead:[55,84], rhythm:[36,60] };
+  const SAMPLER_RANGE = [48,72];   // C3..C5 -> playbackRate 0.5x .. 2.0x
+  const MIN_RETRIG = 0.11;  // seconds; stops 30Hz machine-gunning
+  let bassNext = 0, padNext = 0, bassMin = 0, padMin = 0;
+  let lastBassNote = null, lastPadNote = null;
+  // BASS pulse window: saturation picks the rate, it never stops entirely.
+  const BASS_SLOW = 1.7, BASS_FAST = 0.28, BASS_SAT_FULL = 0.55;
+  const PAD_MAX_HOLD = 2.6;   // pad re-attacks at least this often
   let loadedImage = null, imgRect = null, lastRoot = 0;
   let wheelRotation = 0;
   let bassTriggered = false, padTriggered = false, leadTriggered = false; // per-voice gate state
@@ -753,44 +769,188 @@
   // hue (0-360) -> chromatic note index (0=C .. 11=B)
   const hueToNote = h => ((Math.round(h/30) % 12) + 12) % 12;
 
-  // MIDI note name from a semitone count relative to C, plus octave + base slide
-  function noteFromSemis(semis, oct){
-    const baseShift = Math.round(12*Math.log2(baseFreq/220));
-    const midi = clamp(60 + semis + oct*12 + baseShift, 24, 96);
-    // build name without Tone (works even before Tone loads)
-    const names=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-    return names[((midi%12)+12)%12] + (Math.floor(midi/12)-1);
+  const MIDI_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  const midiToName = m => MIDI_NAMES[((m%12)+12)%12] + (Math.floor(m/12)-1);
+
+  // Fold (don't clamp) into [lo,hi] so the note keeps tracking the image.
+  function foldInto(midi, lo, hi){
+    if(hi-lo < 12) return clamp(midi, lo, hi);
+    while(midi < lo) midi += 12;
+    while(midi > hi) midi -= 12;
+    return clamp(midi, lo, hi);
   }
 
-  // Load an audio file into a voice as a Tone.Sampler (iOS-safe: hand Tone the URL).
-  // The sampler routes through the SAME voice volume as the synth — one graph.
+  // Voice-aware note. Samplers get a tight window; synths get their own register.
+  function voiceNote(key, semis, oct){
+    const baseShift = clamp(Math.round(12*Math.log2(baseFreq/220)), -12, 12);
+    let midi = 60 + semis + oct*12 + baseShift;
+    const v = voices[key];
+    const [lo,hi] = (v && v.sampler) ? SAMPLER_RANGE : (SYNTH_RANGE[key] || [24,96]);
+    return midiToName(foldInto(midi, lo, hi));
+  }
+
+  // ── SAMPLE LOADING ────────────────────────────────────────────────
+  // Every step here failed for someone at some point, so every step is
+  // now defended and reports WHY it failed instead of going quiet.
+  //
+  // The headline bug: a file input only fires `change` when its VALUE
+  // changes. Load kick.wav, clear the voice, pick kick.wav again -> the
+  // value is identical, no event fires, nothing loads, nothing errors.
+  // We reset .value on both sides of every pick.
+
+  function peakOf(audioBuffer){
+    let peak = 0;
+    for(let ch=0; ch<audioBuffer.numberOfChannels; ch++){
+      const d = audioBuffer.getChannelData(ch);
+      const stride = Math.max(1, Math.floor(d.length/50000)); // sample, don't scan 10M floats
+      for(let i=0;i<d.length;i+=stride){ const a=Math.abs(d[i]); if(a>peak) peak=a; }
+    }
+    return peak;
+  }
+
+  // Promise that rejects rather than hanging the button in `loading` forever.
+  function withTimeout(p, ms, label){
+    let t;
+    const timer = new Promise((_,rej)=>{ t=setTimeout(()=>rej(new Error(label+' timed out after '+(ms/1000)+'s')), ms); });
+    return Promise.race([p, timer]).finally(()=>clearTimeout(t));
+  }
+
+  // File -> ArrayBuffer. File.arrayBuffer() is missing on older WebViews.
+  function readFileBuffer(file){
+    if (typeof file.arrayBuffer === 'function') return file.arrayBuffer();
+    return new Promise((res,rej)=>{
+      const fr = new FileReader();
+      fr.onload  = ()=>res(fr.result);
+      fr.onerror = ()=>rej(new Error('FileReader could not read the file'));
+      fr.readAsArrayBuffer(file);
+    });
+  }
+
+  // decodeAudioData has three shapes in the wild. Try all of them.
+  // Each attempt gets its OWN copy: decode detaches the ArrayBuffer, so a
+  // failed attempt leaves the original unusable for the next one.
+  let _decodeCtx = null;
+  async function decodeAudio(arr, sampleRate){
+    const errs = [];
+    const raw = (typeof Tone !== 'undefined') ? Tone.getContext().rawContext : null;
+
+    const ok = b => b && b.length > 0;
+
+    // 1) promise form on the live context (modern everything).
+    //    Old Safari returns UNDEFINED here, not a promise. `await undefined`
+    //    resolves quietly to undefined, so we must check before awaiting or
+    //    we swallow the failure and never reach the callback form.
+    if (raw && raw.decodeAudioData){
+      try {
+        const r = raw.decodeAudioData(arr.slice(0));
+        if (r && typeof r.then === 'function'){
+          const b = await r;
+          if (ok(b)) return b;
+          errs.push('promise: empty buffer');
+        } else {
+          errs.push('promise form unsupported');
+        }
+      } catch(e){ errs.push('promise: '+(e && e.message || e)); }
+
+      // 2) callback form on the live context
+      try {
+        const b = await new Promise((res,rej)=>{
+          const r = raw.decodeAudioData(arr.slice(0), res, rej);
+          if (r && typeof r.then === 'function') r.then(res, rej);
+        });
+        if (ok(b)) return b;
+        errs.push('callback: empty buffer');
+      } catch(e){ errs.push('callback: '+(e && e.message || e)); }
+    }
+
+    // 3) a plain, throwaway context. Sidesteps Tone's standardized-audio-context
+    //    wrapper entirely. Matched sample rate so the pitch doesn't shift.
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (AC){
+      try {
+        if (!_decodeCtx) _decodeCtx = new AC(sampleRate ? {sampleRate} : undefined);
+        const b = await new Promise((res,rej)=>{
+          const r = _decodeCtx.decodeAudioData(arr.slice(0), res, rej);
+          if (r && typeof r.then === 'function') r.then(res, rej);
+        });
+        if (ok(b)) return b;
+        errs.push('fallback ctx: empty buffer');
+      } catch(e){ errs.push('fallback ctx: '+(e && e.message || e)); }
+    }
+    throw new Error(errs.join(' | ') || 'no decoder available');
+  }
+
   async function loadSample(key, file){
-    if (typeof Tone === 'undefined'){ setStatus('Tone.js not loaded — check connection.','wrn'); return; }
+    const btn = $('smp-'+key);
+    if (!file) return;
+    if (typeof Tone === 'undefined'){ setStatus('Tone.js not loaded \u2014 check connection.','wrn'); return; }
+
+    btn.classList.remove('loaded'); btn.classList.add('loading');
+    const short = file.name.length>22 ? file.name.slice(0,21)+'\u2026' : file.name;
+
     try{
-      if (!toneStarted){ try{ await Tone.start(); toneStarted=true; }catch(e){} }
+      if (file.size === 0) throw new Error('file is empty (0 bytes)');
+      if (file.size > 80*1024*1024) throw new Error('file is '+(file.size/1048576|0)+' MB \u2014 too big to decode on mobile');
+
+      // Wake the audio context. Must happen while the file-picker gesture is
+      // still warm, and Tone.start() is a no-op if it is already running.
+      try{ await Tone.start(); toneStarted = true; }catch(e){ /* non-fatal */ }
       if (!audioCtx) initAudio();
-      const v = voices[key]; if(!v){ setStatus('Engine not ready.','wrn'); return; }
-      setStatus(`Loading ${file.name}…`,'inf');
-      const url = URL.createObjectURL(file);
-      if (v.sampler){ try{v.sampler.dispose();}catch(e){} v.sampler=null; }
-      let done=false;
-      const s = new Tone.Sampler({ urls:{ C4:url }, onload:()=>{
-        done=true;
-        const b=$('smp-'+key); b.classList.add('loaded');
-        const nm = file.name.length>10 ? file.name.slice(0,9)+'…' : file.name;
-        $('src-'+key).innerText = nm;
-        setStatus(`${key.toUpperCase()} sample ready: ${file.name}`,'ok');
-      }});
+      const raw = Tone.getContext().rawContext;
+      if (raw && raw.state !== 'running'){ try{ await raw.resume(); }catch(e){} }
+
+      const v = voices[key];
+      if(!v) throw new Error('audio engine not ready \u2014 press PLAY once, then retry');
+
+      setStatus('Reading '+short+'\u2026','inf');
+      const arr = await withTimeout(readFileBuffer(file), 20000, 'read');
+      if (!arr || !arr.byteLength) throw new Error('got 0 bytes back from the file');
+
+      setStatus('Decoding '+short+'\u2026','inf');
+      const audioBuffer = await withTimeout(
+        decodeAudio(arr, raw ? raw.sampleRate : undefined), 30000, 'decode');
+      if (!audioBuffer || !audioBuffer.length) throw new Error('decoded to an empty buffer');
+
+      // Swap in only AFTER a clean decode, so a bad file never kills a good voice.
+      if (v.sampler){ try{ v.sampler.dispose(); }catch(e){} v.sampler = null; }
+
+      const peak = peakOf(audioBuffer);
+      // makeup gain so a whisper and a slammed master land in the same place
+      v.sampleGain = peak > 0.0001 ? clamp(0.72/peak, 0.15, 6) : 1;
+
+      const toneBuf = new Tone.ToneAudioBuffer(audioBuffer);
+      let s = new Tone.Sampler({ urls:{ C4: toneBuf }, attack:0.005, release:0.25 });
+
+      // Belt and braces: if the constructor did not take the buffer, add it by hand.
+      if (!s.loaded){
+        try{ s.add('C4', toneBuf); }catch(e){}
+      }
+      if (!s.loaded) throw new Error('Tone.Sampler would not accept the buffer');
+
       s.connect(v.vol);
-      v.sampler = s; if(key in heldNote) heldNote[key]=null;
-      setTimeout(()=>{ if(!done && voices[key].sampler===s){ setStatus(`${key.toUpperCase()}: couldn\u2019t decode ${file.name} — try WAV or MP3.`,'wrn'); } }, 4000);
-    }catch(err){ console.error(err); setStatus('Could not load that audio file.','wrn'); }
+      v.sampler = s;
+      if (key in heldNote) heldNote[key] = null;
+
+      btn.classList.remove('loading'); btn.classList.add('loaded');
+      btn.innerText = 'CLR';
+      $('src-'+key).innerText = file.name.length>10 ? file.name.slice(0,9)+'\u2026' : file.name;
+      setStatus(key.toUpperCase()+' sample ready: '+short+' \u00b7 '+audioBuffer.duration.toFixed(1)+
+                's \u00b7 peak '+peak.toFixed(2)+' \u00b7 gain \u00d7'+v.sampleGain.toFixed(2),'ok');
+
+    }catch(err){
+      const why = (err && err.message) ? err.message : String(err);
+      console.error('[loadSample:'+key+']', err);
+      btn.classList.remove('loading','loaded');
+      btn.innerText = 'SMP';
+      setStatus(key.toUpperCase()+' \u2014 '+short+': '+why, 'wrn');
+    }
   }
 
   function clearSample(key){
     const v=voices[key];
     if (v && v.sampler){ try{v.sampler.dispose();}catch(e){} v.sampler=null; } if(key in heldNote) heldNote[key]=null;
-    const b=$('smp-'+key); b.classList.remove('loaded');
+    if(v) v.sampleGain = 1;
+    const b=$('smp-'+key); b.classList.remove('loaded','loading'); b.innerText='SMP';
     const defs={bass:'Root',pad:'Third',lead:'Fifth/7th',rhythm:'Root puls'};
     $('src-'+key).innerText = defs[key];
     setStatus(`${key.toUpperCase()} back to synth.`,'inf');
@@ -945,12 +1105,12 @@
     if(scaleMode==='AUTO'){ scaleMode=g.scaleBias; $('btnScale').innerText='SCALE: '+g.scaleBias; }
 
     // 2. Base frequency: brightness maps to register (dark=low, bright=high)
-    const newFreq = Math.round(lerp(110,440,g.brightness));
+    const newFreq = clamp(Math.round(lerp(110,440,g.brightness)), 55, 440);
     baseFreq = newFreq;
     $('sldFreq').value = newFreq; $('txtFreq').innerText = newFreq+' Hz';
 
     // 3. Rhythm rate: edge density drives base rhythm speed
-    const newRate = parseFloat((rhythmRate*(0.5+g.edgeDensity*1.5)).toFixed(1));
+    const newRate = parseFloat((rhythmRateBase*(0.5+g.edgeDensity*1.5)).toFixed(1));
     rhythmRate = clamp(newRate,0.5,20);
     $('sldRate').value = rhythmRate; $('txtRate').innerText = rhythmRate.toFixed(1)+' Hz';
 
@@ -1075,7 +1235,7 @@
     masterGain.connect(audioRecorder);
     VKEYS.forEach(key => {
       const vol = new Tone.Gain(1).connect(masterGain);   // straight to master, no FX
-      voices[key] = { synth:null, sampler:null, vol, instr:VINSTR[key], levelMul:VLEVEL[key] };
+      voices[key] = { synth:null, sampler:null, vol, instr:VINSTR[key], levelMul:VLEVEL[key], sampleGain:1 };
       buildSynth(key);
     });
     rhythmNext = Tone.now();
@@ -1102,7 +1262,8 @@
   // trigger a voice at a note for a duration — sampler wins if one is loaded
   function playVoice(key, note, dur, vel, time){
     const v=voices[key]; if(!v) return;
-    const level = clamp((v.levelMul!=null?v.levelMul:1), 0, 2);
+    const mk = v.sampler ? (v.sampleGain||1) : 1;
+    const level = clamp((v.levelMul!=null?v.levelMul:1) * mk, 0, 2.5);
     try{ v.vol.gain.rampTo(level, 0.03); }catch(e){}
     if (v.sampler){
       try{ v.sampler.triggerAttackRelease(note, dur, time, clamp(vel*0.9,0,1)); }catch(e){}
@@ -1120,13 +1281,17 @@
       try{ if(v.sampler&&v.sampler.releaseAll) v.sampler.releaseAll(); }catch(e){}
     });
     heldNote.bass=heldNote.pad=heldNote.lead=null;
+    bassTriggered=padTriggered=leadTriggered=false;
+    bassNext=padNext=bassMin=padMin=0;
+    lastBassNote=lastPadNote=null;
   }
 
   // Sustained voice: holds its note and only re-attacks when the note CHANGES.
   // This is what keeps bass/pad/lead off the pulse — they glide with the scan.
   function holdVoice(key, note, vel, time){
     const v=voices[key]; if(!v) return;
-    const level = clamp((v.levelMul!=null?v.levelMul:1), 0, 2);
+    const mk = v.sampler ? (v.sampleGain||1) : 1;
+    const level = clamp((v.levelMul!=null?v.levelMul:1) * mk, 0, 2.5);
     try{ v.vol.gain.rampTo(level, 0.03); }catch(e){}
     if(note===heldNote[key]) return;                 // already holding it — sustain
     if(heldNote[key]!=null){                          // release the old note first
@@ -1167,51 +1332,67 @@
     // lead is now 0 (was +1) so it sits straight, no octave stacking
     const vOct = { bass:0, pad:0, lead:0, rhythm:1 };
 
-    const now = Tone.now();
+    // small lookahead: scheduling AT Tone.now() lands in the past by the time
+    // the audio thread sees it, which makes Tone drop notes silently.
+    const now = Tone.now() + 0.02;
 
     // RHYTHM — edge-driven pulse clock.
     {
       const edgeMod = mPri.edgeDensity*rhythmDepth;
-      const rate = rhythmRate*(0.4+edgeMod*2.6);
-      const interval = (1/Math.max(rate,0.3))*(0.7*0.6);
+      const rate = clamp(rhythmRate*(0.4+edgeMod*2.6), 0.3, 24);
+      const interval = 1/rate;                      // was scaled by 0.42 -> ~2.4x too fast
       if(now >= rhythmNext){
         rhythmNext = now + interval;
         if(voices.rhythm.instr!=='OFF' || voices.rhythm.sampler)
-          playVoice('rhythm', noteFromSemis(rootIdx + trans('rhythm'), vOct.rhythm), 0.18, 0.5, now);
+          playVoice('rhythm', voiceNote('rhythm', rootIdx + trans('rhythm'), vOct.rhythm),
+                    Math.min(0.18, interval*0.8), 0.5, now);
       }
     }
 
-    // LEAD — same clock as rhythm but melodic: edge density picks the scale interval,
-    // plays at half the rhythm rate so it doesn't just double the beat.
+    // LEAD — same clock, half rate, melodic.
     {
       const edgeMod = mPri.edgeDensity*rhythmDepth;
-      const rate = rhythmRate*(0.4+edgeMod*1.6) * 0.5;  // half rate = melodic feel
-      const interval = (1/Math.max(rate,0.2))*(0.7*0.6);
+      const rate = clamp(rhythmRate*(0.4+edgeMod*1.6)*0.5, 0.2, 12);
+      const interval = 1/rate;
       if(now >= leadPulseNext){
         leadPulseNext = now + interval;
         const edgeInterval = Math.floor(mPri.edgeDensity * 12);
-        const leadNote = noteFromSemis(rootIdx + edgeInterval + trans('lead'), vOct.lead);
+        const leadNote = voiceNote('lead', rootIdx + edgeInterval + trans('lead'), vOct.lead);
         if(voices.lead.instr!=='OFF' || voices.lead.sampler)
-          playVoice('lead', leadNote, 0.4, 0.4 + mPri.edgeDensity*0.9, now);
+          playVoice('lead', leadNote, Math.min(0.4, interval*0.85), 0.4 + mPri.edgeDensity*0.5, now);
       }
     }
 
-    // BASS — driven by SATURATION gate. Lower threshold so it actually fires.
+    // BASS — always running. Saturation sets the PULSE RATE, not whether it
+    // sounds at all. A latch on absolute level dies on any image whose
+    // saturation never dips back under the re-arm threshold.
     {
-      const f = sat;
-      if(f >= 0.1 && !bassTriggered){
-        playVoice('bass', noteFromSemis(rootIdx + trans('bass'), vOct.bass), 0.15 + f*0.8, 0.5 + f*0.4, now);
-        bassTriggered = true;
-      } else if(f < 0.9){ bassTriggered = false; }
+      const f = clamp(sat / BASS_SAT_FULL, 0, 1);
+      const interval = lerp(BASS_SLOW, BASS_FAST, f);
+      const note = voiceNote('bass', rootIdx + trans('bass'), vOct.bass);
+      const changed = note !== lastBassNote;
+      if((changed || now >= bassNext) && now >= bassMin){
+        // sustain across the gap so it reads as a line, not a blip
+        playVoice('bass', note, interval*0.95, 0.45 + f*0.35, now);
+        lastBassNote = note;
+        bassNext = now + interval;
+        bassMin  = now + MIN_RETRIG;
+      }
     }
 
-    // PAD — driven by LUMINANCE gate. Lowered threshold.
+    // PAD — luminance shapes velocity + hold length; re-attacks when the chord
+    // moves or when the hold expires, so it can't latch silent either.
     {
-      const f = bright;
-      if(f >= 0.2 && !padTriggered){
-        playVoice('pad', noteFromSemis(rootIdx + third + trans('pad'), vOct.pad), 0.8, 0.1 + f*0.7, now);
-        padTriggered = true;
-      } else if(f < 0.8){ padTriggered = false; }
+      const f = clamp(bright, 0, 1);
+      const hold = lerp(PAD_MAX_HOLD, 1.1, f);
+      const note = voiceNote('pad', rootIdx + third + trans('pad'), vOct.pad);
+      const changed = note !== lastPadNote;
+      if((changed || now >= padNext) && now >= padMin){
+        playVoice('pad', note, hold*0.95, 0.12 + f*0.6, now);
+        lastPadNote = note;
+        padNext = now + hold;
+        padMin  = now + MIN_RETRIG*2;
+      }
     }
 
     const chordLabel = HUE_NOTES[rootIdx] + qual + (use7?'7':'');
@@ -1247,8 +1428,9 @@
     const cw=scanCanvas.width,ch=scanCanvas.height;
     scanCtx.fillStyle='#080809'; scanCtx.fillRect(0,0,cw,ch);
     if(!loadedImage) return;
-    const r=imgRect; scanCtx.clearRect(0, 0, scanCanvas.width, scanCanvas.height);
-scanCtx.drawImage(loadedImage, r.x, r.y, r.w, r.h);    if((scanMode==='V'||scanMode==='DUAL')&&compV.length) {
+    const r=imgRect;
+    scanCtx.drawImage(loadedImage, r.x, r.y, r.w, r.h);
+    if((scanMode==='V'||scanMode==='DUAL')&&compV.length) {
       const sy=r.y+(idxV/compV.length)*r.h;
       scanCtx.save(); scanCtx.strokeStyle='rgba(255,230,0,0.20)'; scanCtx.lineWidth=7;
       scanCtx.beginPath(); scanCtx.moveTo(r.x,sy); scanCtx.lineTo(r.x+r.w,sy); scanCtx.stroke();
@@ -1308,11 +1490,11 @@ scanCtx.drawImage(loadedImage, r.x, r.y, r.w, r.h);    if((scanMode==='V'||scanM
 
   // FILE
   const scanPanel=$('scan-panel'), fileIn=$('fileIn');
-  scanPanel.addEventListener('click',()=>{if(!loadedImage)fileIn.click();});
+  scanPanel.addEventListener('click',()=>{if(!loadedImage){fileIn.value='';fileIn.click();}});
   scanPanel.addEventListener('dragover',e=>{e.preventDefault();scanPanel.classList.add('drag-over');});
   scanPanel.addEventListener('dragleave',()=>scanPanel.classList.remove('drag-over'));
   scanPanel.addEventListener('drop',e=>{e.preventDefault();scanPanel.classList.remove('drag-over');if(e.dataTransfer.files.length)loadFile(e.dataTransfer.files[0]);});
-  fileIn.addEventListener('change',e=>{if(e.target.files.length)loadFile(e.target.files[0]);});
+  fileIn.addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(f)loadFile(f);});
 
   function loadFile(file) {
     if (file.type && file.type.includes('heic') || /\.heic$/i.test(file.name||'')) {
@@ -1348,6 +1530,8 @@ scanCtx.drawImage(loadedImage, r.x, r.y, r.w, r.h);    if((scanMode==='V'||scanM
       if(audioCtx.state==='suspended'){ try{ await audioCtx.resume(); }catch(e){} }
       const now=Tone.now();
       samplePulseNext = now; rhythmNext = now; leadPulseNext = now;
+      bassNext = now; padNext = now; bassMin = now; padMin = now;
+      lastBassNote = null; lastPadNote = null;
       isPlaying=true;
       this.innerText='■ TERMINATE'; this.classList.add('active');
       $('sdot').classList.add('live'); $('stxt').innerText='SYS_ACTIVE';
@@ -1384,7 +1568,7 @@ scanCtx.drawImage(loadedImage, r.x, r.y, r.w, r.h);    if((scanMode==='V'||scanM
   $('sldGain').addEventListener('input',e=>{const g=parseFloat(e.target.value);$('txtGain').innerText=g.toFixed(2);if(masterGain){try{masterGain.gain.rampTo(g,0.02);}catch(err){}}});
   $('sldSpeed').addEventListener('input',e=>{speedMul=parseFloat(e.target.value);$('txtSpeed').innerText=`${speedMul.toFixed(2)}x`;});
   $('sldWheel').addEventListener('input',e=>{wheelRotation=parseFloat(e.target.value);$('txtWheel').innerText=`${Math.round(wheelRotation)}°`;});
-  $('sldRate').addEventListener('input',e=>{rhythmRate=parseFloat(e.target.value);$('txtRate').innerText=`${rhythmRate.toFixed(1)} Hz`;});
+  $('sldRate').addEventListener('input',e=>{rhythmRate=parseFloat(e.target.value);rhythmRateBase=rhythmRate;$('txtRate').innerText=`${rhythmRate.toFixed(1)} Hz`;});
   $('sldDepth').addEventListener('input',e=>{rhythmDepth=parseFloat(e.target.value);$('txtDepth').innerText=rhythmDepth.toFixed(2);});
 
   VKEYS.forEach(key=>{
@@ -1400,9 +1584,15 @@ scanCtx.drawImage(loadedImage, r.x, r.y, r.w, r.h);    if((scanMode==='V'||scanM
       if (voices[key] && voices[key].sampler) { clearSample(key); return; }
       // wake Tone's context inside the gesture, then open the picker (both sync)
       if (typeof Tone!=='undefined' && !toneStarted){ Tone.start().then(()=>{toneStarted=true;}).catch(()=>{}); }
-      $('file-'+key).click();
+      const inp = $('file-'+key);
+      inp.value = '';        // <- a stale value means `change` never fires on a re-pick
+      inp.click();
     });
-    $('file-'+key).addEventListener('change',e=>{ if(e.target.files[0]) loadSample(key,e.target.files[0]); });
+    $('file-'+key).addEventListener('change',e=>{
+      const f = e.target.files && e.target.files[0];
+      e.target.value = '';   // <- clear immediately so the SAME file can be picked again
+      if (f) loadSample(key, f);
+    });
     $('vl-'+key).addEventListener('input',e=>{
       const val=parseFloat(e.target.value); $('vv-'+key).innerText=val.toFixed(2);
       VLEVEL[key]=val; if(voices[key])voices[key].levelMul=val;
