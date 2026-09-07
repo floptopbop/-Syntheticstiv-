@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>SF_PROBE + PIXEL SYMPHONY (final fixed)</title>
+<title>ALPHAKEYBOARD</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 :root{
   --void:#070b12; --panel:#0b1120; --panel2:#0e1526; --line:#182642; --line2:#23375e;
-  --cream:#ece5d2; --dim:#6f7d97; --dim2:#43506b;
+  --cream:#ece5d2; --dim:#9dabc6; --dim2:#5c6b8a;
+  --dockH:190px;
   --accent:#ffb703; --accent-dim:#8c6400; --magenta:#ff007f; --amber:#ffb703;
   --red:#ff6b6b; --wkey:#d7d1c1; --wkey2:#b7b1a1; --bkey:#0d131e;
 }
@@ -65,11 +66,11 @@ body{
 .readout{
   border:1px solid var(--line); border-radius:4px;
   background:linear-gradient(180deg,var(--panel2),var(--panel));
-  padding:9px 10px 8px;
+  padding:7px 10px 6px;
 }
 .rname{
-  display:flex; align-items:baseline; gap:8px; margin-bottom:8px;
-  padding-bottom:8px; border-bottom:1px dashed var(--line);
+  display:flex; align-items:baseline; gap:8px; margin-bottom:6px;
+  padding-bottom:6px; border-bottom:1px dashed var(--line);
 }
 .rname .lbl{font-size:9px; letter-spacing:2px; color:var(--dim); flex:0 0 auto;}
 .rname .val{
@@ -81,10 +82,23 @@ body{
   margin-left:auto; flex:0 0 auto; font-size:10px; color:var(--dim);
   max-width:42%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
+/* one condensed line instead of a five-cell stacked block */
+.sliver{
+  display:flex; align-items:center; gap:10px; flex-wrap:nowrap;
+  overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none;
+  white-space:nowrap; padding-bottom:2px;
+}
+.sliver::-webkit-scrollbar{display:none;}
+.s-i{display:flex; align-items:baseline; gap:5px; flex:0 0 auto;}
+.s-i b{font-size:10px; font-weight:400; letter-spacing:1.2px; color:var(--dim);}
+.s-i .v{font-size:14px; color:var(--cream);}
+.s-i .v.g{color:var(--accent);}
+.s-addr .v{font-size:12px; color:var(--dim);}
+.sliver .sigwrap{flex:1 1 40px; min-width:36px; height:4px; margin-top:0;}
 .cells{display:grid; grid-template-columns:repeat(5,1fr); gap:6px;}
 .cell{display:flex; flex-direction:column; gap:2px; min-width:0;}
-.cell .k{font-size:8px; letter-spacing:1.5px; color:var(--dim);}
-.cell .v{font-size:13px; color:var(--cream); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.cell .k{font-size:10px; letter-spacing:1.2px; color:var(--dim);}
+.cell .v{font-size:14px; color:var(--cream); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 .cell .v.g{color:var(--accent);}
 .sigwrap{height:3px; background:#0a1220; border:1px solid var(--line); border-radius:2px; margin-top:3px; overflow:hidden;}
 .sigbar{height:100%; width:20%; background:linear-gradient(90deg,var(--accent-dim),var(--accent)); transition:width .12s linear;}
@@ -134,7 +148,7 @@ body{
 .hint.err{color:var(--red);}
 /* ---------- controls ---------- */
 .controls{flex:0 0 auto; display:flex; align-items:stretch; gap:7px;}
-.stepper{display:flex; align-items:stretch; border:1px solid var(--line); border-radius:4px; overflow:hidden;}
+.stepper{display:flex; align-items:stretch; border:1px solid var(--line); border-radius:4px; overflow:hidden; flex-shrink:0;}
 .stepper button{
   border:0; background:var(--panel2); color:var(--accent); font:inherit; font-size:17px;
   width:38px; cursor:pointer;
@@ -163,10 +177,36 @@ body{
 .vol input::-moz-range-thumb{width:16px; height:16px; border:0; border-radius:50%; background:var(--accent); box-shadow:0 0 8px rgba(255,183,3,.5); cursor:pointer;}
 
 /* ---------- keyboard ---------- */
+/* fixed to bottom of viewport — always accessible */
+.kb-dock{
+  position:fixed; bottom:0; left:0; right:0; z-index:100;
+  background:#05080e;
+  padding: 0 calc(env(safe-area-inset-right) + 10px) max(env(safe-area-inset-bottom), 8px) calc(env(safe-area-inset-left) + 10px);
+}
+.kb-dock .controls{ border-top:1px solid var(--line); padding:4px 0; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+/* fold handle — the collapsed tray is just this bar */
+.kb-handle{
+  display:flex; align-items:center; gap:12px; height:30px;
+  border-top:1px solid var(--line2); cursor:pointer;
+  touch-action:manipulation; user-select:none;
+}
+.kb-handle:active{background:#0b1220;}
+.kb-handle .grip{
+  width:34px; height:4px; border-radius:2px; background:var(--line2); flex:0 0 auto;
+}
+.kb-handle .h-i{display:flex; align-items:baseline; gap:5px; flex:0 0 auto;}
+.kb-handle .h-i b{font-size:10px; font-weight:400; letter-spacing:1.2px; color:var(--dim);}
+.kb-handle .h-i span{font-size:14px; color:var(--cream);}
+.kb-handle .h-i span.g{color:var(--accent);}
+.kb-handle .chev{margin-left:auto; font-size:12px; color:var(--accent); flex:0 0 auto;}
+.kb-dock.folded .controls, .kb-dock.folded .keys{ display:none; }
+.kb-dock.folded .kb-handle{ border-top-color:var(--accent-dim); }
+.kb-dock .btn{ flex:0 0 auto; padding:0 12px; }
+.kb-dock .vol{ flex:1 1 auto; min-width:100px; }
 .keys{
   flex:0 0 auto; position:relative;
-  height:180px;
-  border:1px solid var(--line); border-radius:5px; overflow:hidden;
+  height:130px;
+  overflow:hidden;
   background:#05080e; touch-action:none;
 }
 .keys.off{opacity:.38; filter:grayscale(.4);}
@@ -201,25 +241,85 @@ body{
 .collapsible.collapsed .content { display:none; }
 .settings-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px 10px; }
 .settings-grid .param { display:flex; flex-direction:column; gap:2px; }
-.settings-grid .param label { font-size:8px; color:var(--dim); letter-spacing:0.5px; }
-.settings-grid .param input[type="range"] { width:100%; accent-color:var(--accent); }
-.settings-grid .param .val { font-size:10px; color:var(--cream); text-align:right; }
-.check-row { display:flex; align-items:center; gap:6px; font-size:10px; margin:3px 0; }
-.check-row input { accent-color:var(--accent); }
+.settings-grid .param label { font-size:10px; color:var(--dim); letter-spacing:0.5px; }
+.settings-grid .param input[type="range"] { width:100%; accent-color:var(--accent); height:26px; }
+.settings-grid .param .val { font-size:12px; color:var(--accent); text-align:right; }
+.check-row { display:flex; align-items:center; gap:8px; font-size:12px; margin:5px 0; color:var(--cream); }
+.check-row input { accent-color:var(--accent); width:18px; height:18px; }
+.collapsible .title-bar { font-size:12px !important; color:var(--cream); }
+
+/* voice selector rows — class was referenced in markup but never defined */
+.voice-sel { display:flex; align-items:center; gap:8px; }
+.voice-sel label { font-size:11px; letter-spacing:1px; flex:0 0 auto; }
+
+/* ---------- image preview + playhead ---------- */
+#imgWrap{
+  position:relative; display:none; margin:0 auto 6px;
+  border:1px solid var(--line); border-radius:3px;
+  background:#04070f; overflow:hidden; line-height:0;
+}
+#imageCanvas{ display:block; width:100%; height:100%; }
+#playhead{
+  position:absolute; left:0; right:0; top:0; height:0;
+  border-top:2px solid var(--accent);
+  box-shadow:0 0 10px 1px rgba(255,183,3,.85);
+  pointer-events:none; display:none; z-index:3;
+}
+#playhead::after{
+  content:''; position:absolute; left:0; right:0; top:-14px; height:14px;
+  background:linear-gradient(180deg, rgba(255,183,3,0) 0%, rgba(255,183,3,.22) 100%);
+}
+#vbar{
+  position:absolute; top:0; bottom:0; left:0; width:0;
+  border-left:2px solid var(--magenta);
+  box-shadow:0 0 10px 1px rgba(255,0,127,.8);
+  pointer-events:none; display:none; z-index:3;
+}
+#secLines{ position:absolute; inset:0; pointer-events:none; z-index:2; }
+#secLines i{ position:absolute; left:0; right:0; height:0; border-top:1px dashed rgba(255,255,255,.22); }
+#readPos{
+  font-size:11px; color:var(--accent); letter-spacing:1px;
+  min-height:14px; margin-bottom:4px;
+}
 
 /* ---------- mobile adjustments ---------- */
 @media (max-width: 600px) {
-  .browser { max-height: 180px; }  /* prevent it from eating all space */
-  .keys { height: 180px; }
+  .browser { max-height: 180px; }
+  .keys { height: 120px; }
   .image-section { max-height: 200px; overflow-y: auto; }
 }
+/* ---------- scope popup ---------- */
+.scope-popup{
+  position:fixed; left:0; right:0; z-index:99;
+  bottom:var(--dockH);
+  transform:translateY(calc(100% + 8px)); transition:transform .25s ease;
+  pointer-events:none; visibility:hidden;
+}
+.scope-popup.open{
+  transform:translateY(0); pointer-events:auto; visibility:visible;
+}
+.scope-popup.open .scope-panel{ backdrop-filter:blur(8px); }
+.scope-popup .scope-panel{
+  background:#04070fF0;
+  border:1px solid var(--line2); border-radius:6px;
+  margin:0 8px;
+  padding:6px 10px 4px;
+}
+.scope-popup .scopewrap{height:100px; border:1px solid var(--line); border-radius:4px; background:#04070f; overflow:hidden;}
+.scope-popup canvas{width:100%;height:100%;display:block}
+.scope-popup .scope-readout{
+  display:flex; gap:8px; padding:4px 0 0; font-size:9px; color:var(--dim);
+}
+.scope-popup .scope-readout .v{color:var(--accent)}
+/* body needs padding so content isn't hidden behind the dock */
+body{ padding-bottom:calc(var(--dockH) + 12px) !important; }
 </style>
 </head>
 <body>
 
   <div class="top">
     <div class="brand">
-      <div class="title"><span class="led" id="led"></span>SF_PROBE<span style="opacity:.5;font-size:.58em;letter-spacing:.14em;margin-left:.55em;vertical-align:middle">BUILD·04</span></div>
+      <div class="title"><span class="led" id="led"></span>SF_PROBE<span style="opacity:.5;font-size:.58em;letter-spacing:.14em;margin-left:.55em;vertical-align:middle">BUILD·20</span></div>
       <div class="sub" id="status">soundfont audition · idle</div>
     </div>
     <label class="load">LOAD SF
@@ -233,16 +333,14 @@ body{
       <span class="val" id="rPreset">— no bank loaded —</span>
       <span class="fn" id="fname"></span>
     </div>
-    <div class="cells">
-      <div class="cell"><span class="k">ADDR</span><span class="v" id="rAddr">---:--- / ---</span></div>
-      <div class="cell"><span class="k">NOTE</span><span class="v g" id="rNote">--</span></div>
-      <div class="cell"><span class="k">VEL</span><span class="v" id="rVel">--</span></div>
-      <div class="cell"><span class="k">HELD</span><span class="v" id="rHeld">0</span></div>
-      <div class="cell"><span class="k">SIG</span><span class="v" id="rSig">-- dB</span>
-        <div class="sigwrap"><div class="sigbar" id="sigbar"></div></div>
-      </div>
+    <div class="sliver">
+      <span class="s-i"><b>NOTE</b><span class="v g" id="rNote">--</span></span>
+      <span class="s-i"><b>VEL</b><span class="v" id="rVel">--</span></span>
+      <span class="s-i"><b>HELD</b><span class="v" id="rHeld">0</span></span>
+      <span class="s-i"><b>SIG</b><span class="v" id="rSig">-- dB</span></span>
+      <span class="s-i s-addr"><b>ADDR</b><span class="v" id="rAddr">---:---</span></span>
+      <span class="sigwrap"><span class="sigbar" id="sigbar"></span></span>
     </div>
-    <div class="scopewrap"><canvas id="scope"></canvas></div>
   </div>
 
   <div class="browser">
@@ -265,10 +363,33 @@ body{
     <div class="content">
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
         <button id="loadImageBtn" class="btn" style="flex:1;min-width:60px;">LOAD IMAGE</button>
-        <button id="generateBtn" class="btn accent" disabled style="flex:1;">GENERATE & PLAY</button>
+        <button id="generateBtn" class="btn accent" style="flex:1;">GENERATE & PLAY</button>
         <button id="stopBtn" class="btn" style="flex:1;">STOP</button>
       </div>
-      <canvas id="imageCanvas" style="display:none;width:100%;max-height:100px;border:1px solid var(--line);margin-bottom:6px;"></canvas>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
+        <button class="btn act" id="engOsc" style="flex:1;min-width:60px;">OSC</button>
+        <button class="btn" id="engSf" style="flex:1;min-width:60px;">SNDFNT</button>
+        <button class="btn" id="btnDual" style="flex:1;min-width:60px;">DUAL V+H</button>
+        <button class="btn" id="btnScrub" style="flex:1;min-width:60px;">SCRUB</button>
+      </div>
+      <div class="voice-sel" style="margin-bottom:6px;">
+        <label>WAVE</label>
+        <select id="oscWave" style="flex:1;background:var(--panel2);color:var(--cream);border:1px solid var(--line);font:inherit;padding:5px;font-size:12px;">
+          <option value="sine">SINE — pure</option>
+          <option value="triangle" selected>TRIANGLE — soft</option>
+          <option value="sawtooth">SAWTOOTH — bright</option>
+          <option value="square">SQUARE — hollow</option>
+        </select>
+      </div>
+      <div id="imgWrap">
+        <canvas id="imageCanvas"></canvas>
+        <div id="secLines"></div>
+        <div id="playhead"></div>
+        <div id="vbar"></div>
+      </div>
+      <div id="readPos"></div>
+      <div id="sectionViz" style="display:none;height:24px;border:1px solid var(--line);border-radius:3px;overflow:hidden;margin-bottom:3px;"></div>
+      <div id="moodLog" style="font-size:10px;color:var(--dim);letter-spacing:.5px;line-height:1.6;min-height:12px;margin-bottom:4px;"></div>
       <div class="voice-sel" style="margin-bottom:4px;">
         <label style="color:var(--dim);width:36px;">PAD</label>
         <select id="voicePad" style="flex:1;background:var(--panel2);color:var(--cream);border:1px solid var(--line);font:inherit;padding:4px;"></select>
@@ -285,24 +406,24 @@ body{
   </div>
 
   <!-- ALGORITHM PARAMETERS -->
-  <div class="collapsible" id="algoSection">
+  <div class="collapsible collapsed" id="algoSection">
     <div class="title-bar" onclick="toggleCollapse('algoSection')">
       <span>⚙ ALGORITHM PARAMETERS (27 factors)</span>
       <span class="toggle-icon">▼</span>
     </div>
     <div class="content">
-      <div class="collapsible" id="globalAnalysis">
+      <div class="collapsible collapsed" id="globalAnalysis">
         <div class="title-bar" onclick="toggleCollapse('globalAnalysis')">GLOBAL ANALYSIS</div>
         <div class="content settings-grid">
-          <div class="param"><label>BPM CALM</label><input type="range" id="bpmCalm" min="40" max="220" value="66"><span class="val" id="bpmCalmVal">66</span></div>
-          <div class="param"><label>BPM BUSY</label><input type="range" id="bpmBusy" min="80" max="300" value="132"><span class="val" id="bpmBusyVal">132</span></div>
-          <div class="param"><label>WARM HI</label><input type="range" id="warmHi" min="0.30" max="0.95" step="0.01" value="0.60"><span class="val" id="warmHiVal">0.60</span></div>
+          <div class="param"><label>BPM CALM</label><input type="range" id="bpmCalm" min="60" max="220" value="120"><span class="val" id="bpmCalmVal">120</span></div>
+          <div class="param"><label>BPM BUSY</label><input type="range" id="bpmBusy" min="60" max="220" value="120"><span class="val" id="bpmBusyVal">120</span></div>
+          <div class="param"><label>WARM HI</label><input type="range" id="warmHi" min="0.05" max="0.95" step="0.01" value="0.60"><span class="val" id="warmHiVal">0.60</span></div>
           <div class="param"><label>WARM LO</label><input type="range" id="warmLo" min="0.05" max="0.70" step="0.01" value="0.40"><span class="val" id="warmLoVal">0.40</span></div>
           <div class="param"><label>SAT LO</label><input type="range" id="satLo" min="0.01" max="0.60" step="0.01" value="0.18"><span class="val" id="satLoVal">0.18</span></div>
           <div class="param"><label>ROOT HUE OFFSET</label><input type="range" id="rootHueOffset" min="-12" max="12" step="1" value="0"><span class="val" id="rootHueOffsetVal">0</span></div>
         </div>
       </div>
-      <div class="collapsible" id="voiceRanges">
+      <div class="collapsible collapsed" id="voiceRanges">
         <div class="title-bar" onclick="toggleCollapse('voiceRanges')">VOICE RANGES & ON/OFF</div>
         <div class="content">
           <div class="check-row"><input type="checkbox" id="usePad" checked><label>USE PAD</label></div>
@@ -312,42 +433,66 @@ body{
           </div>
           <div class="check-row"><input type="checkbox" id="useBass" checked><label>USE BASS</label></div>
           <div class="settings-grid" style="margin-bottom:6px;">
-            <div class="param"><label>BASS LO</label><input type="range" id="bassLo" min="12" max="127" value="28"><span class="val" id="bassLoVal">28</span></div>
-            <div class="param"><label>BASS HI</label><input type="range" id="bassHi" min="12" max="127" value="48"><span class="val" id="bassHiVal">48</span></div>
+            <div class="param"><label>BASS LO</label><input type="range" id="bassLo" min="20" max="127" value="28"><span class="val" id="bassLoVal">28</span></div>
+            <div class="param"><label>BASS HI</label><input type="range" id="bassHi" min="20" max="127" value="48"><span class="val" id="bassHiVal">48</span></div>
           </div>
           <div class="check-row"><input type="checkbox" id="useLead" checked><label>USE LEAD</label></div>
           <div class="settings-grid" style="margin-bottom:6px;">
             <div class="param"><label>LEAD LO</label><input type="range" id="leadLo" min="12" max="127" value="60"><span class="val" id="leadLoVal">60</span></div>
             <div class="param"><label>LEAD HI</label><input type="range" id="leadHi" min="12" max="127" value="88"><span class="val" id="leadHiVal">88</span></div>
           </div>
-          <div class="check-row"><input type="checkbox" id="usePerc" checked><label>USE PERCUSSION</label></div>
+          <div class="check-row"><span style="opacity:.72;font-size:11px;letter-spacing:.08em;">VISUAL EVENTS → BASS / LEAD</span></div>
         </div>
       </div>
-      <div class="collapsible" id="noteParams">
+      <div class="collapsible collapsed" id="noteParams">
         <div class="title-bar" onclick="toggleCollapse('noteParams')">NOTE & CHORD SHAPING</div>
         <div class="content settings-grid">
-          <div class="param"><label>STEPS</label><input type="range" id="stepsSlider" min="8" max="2000" value="64" step="4"><span class="val" id="stepsSliderVal">64</span></div>
+          <div class="param"><label>STEPS</label><input type="range" id="stepsSlider" min="8" max="512" value="64" step="4"><span class="val" id="stepsSliderVal">128</span></div>
           <div class="param"><label>STEP BEATS</label><input type="range" id="stepBeats" min="0.05" max="4.0" step="0.05" value="0.5"><span class="val" id="stepBeatsVal">0.50</span></div>
-          <div class="param"><label>ANALYZE RES</label><input type="range" id="analyzeMax" min="64" max="4096" step="64" value="256"><span class="val" id="analyzeMaxVal">256</span></div>
-          <div class="param"><label>CHORD SECTIONS</label><input type="range" id="chordSecSlider" min="1" max="64" value="4"><span class="val" id="chordSecSliderVal">4</span></div>
-          <div class="param"><label>LEAD FLURRY</label><input type="range" id="flurrySlider" min="1" max="200" step="0.5" value="7"><span class="val" id="flurrySliderVal">7.0</span></div>
-          <div class="param"><label>GATE DARK</label><input type="range" id="gateDarkSlider" min="0.001" max="0.99" step="0.001" value="0.10"><span class="val" id="gateDarkSliderVal">0.10</span></div>
-          <div class="param"><label>LEAD STAB</label><input type="range" id="leadStab" min="0.01" max="8.0" step="0.05" value="0.85"><span class="val" id="leadStabVal">0.85</span></div>
-          <div class="param"><label>CHORD STRUM</label><input type="range" id="chordStrum" min="0" max="4.0" step="0.01" value="0.03"><span class="val" id="chordStrumVal">0.03</span></div>
-          <div class="param"><label>BASS DIV</label><input type="range" id="bassDiv" min="1" max="64" step="1" value="2"><span class="val" id="bassDivVal">2</span></div>
+          <div class="param"><label>ANALYZE RES</label><input type="range" id="analyzeMax" min="64" max="1024" step="4" value="940"><span class="val" id="analyzeMaxVal">940</span></div>
+          <div class="param"><label>CHORD SECTIONS</label><input type="range" id="chordSecSlider" min="1" max="18" value="8"><span class="val" id="chordSecSliderVal">8</span></div>
+          <div class="param"><label>LEAD ACTIVITY</label><input type="range" id="flurrySlider" min="1" max="14" step="0.5" value="7"><span class="val" id="flurrySliderVal">9</span></div>
+          <div class="param"><label>GATE DARK</label><input type="range" id="gateDarkSlider" min="0.001" max="0.60" step="0.001" value="0.10"><span class="val" id="gateDarkSliderVal">0.10</span></div>
+          <div class="param"><label>LEAD LENGTH</label><input type="range" id="leadStab" min="0.05" max="2.0" step="0.05" value="0.85"><span class="val" id="leadStabVal">0.85</span></div>
+          <div class="param"><label>CHORD STRUM</label><input type="range" id="chordStrum" min="0" max="0.50" step="0.01" value="0.03"><span class="val" id="chordStrumVal">0.03</span></div>
+          <div class="param"><label>BASS DENSITY</label><input type="range" id="bassDiv" min="1" max="8" step="1" value="2"><span class="val" id="bassDivVal">2</span></div>
           <div class="param"><label>VEL MIN</label><input type="range" id="velMin" min="0" max="127" value="24"><span class="val" id="velMinVal">24</span></div>
           <div class="param"><label>VEL MAX</label><input type="range" id="velMax" min="0" max="127" value="118"><span class="val" id="velMaxVal">118</span></div>
-          <div class="param"><label>PERC TEXTURE GATE</label><input type="range" id="percTexGate" min="0.0" max="0.99" step="0.01" value="0.55"><span class="val" id="percTexGateVal">0.55</span></div>
-          <div class="param"><label>PERC EDGE GATE</label><input type="range" id="percEdgeGate" min="0.001" max="0.99" step="0.001" value="0.14"><span class="val" id="percEdgeGateVal">0.14</span></div>
+          <div class="param"><label>DETAIL GATE</label><input type="range" id="percTexGate" min="0.0" max="0.99" step="0.01" value="0.55"><span class="val" id="percTexGateVal">0.55</span></div>
+          <div class="param"><label>EVENT GATE</label><input type="range" id="percEdgeGate" min="0.001" max="0.99" step="0.001" value="0.14"><span class="val" id="percEdgeGateVal">0.14</span></div>
         </div>
       </div>
       <div class="check-row" style="margin-top:6px;">
         <input type="checkbox" id="scaleLock" checked>
         <label>SCALE LOCK (snap to key)</label>
       </div>
+      <div class="check-row" style="margin-top:4px;">
+        <input type="checkbox" id="freeRead">
+        <label>FREE READ (raw image → chromatic)</label>
+      </div>
     </div>
   </div>
 
+<!-- SCOPE POPUP — slides up from above the keyboard -->
+<div class="scope-popup" id="scopePopup">
+  <div class="scope-panel">
+    <div class="scopewrap"><canvas id="scope"></canvas></div>
+    <div class="scope-readout">
+      <span>SIG <span class="v" id="rSig2">-- dB</span></span>
+      <span>NOTE <span class="v" id="rNote2">--</span></span>
+      <span>HELD <span class="v" id="rHeld2">0</span></span>
+    </div>
+  </div>
+</div>
+
+<!-- KEYBOARD DOCK — fixed to bottom -->
+<div class="kb-dock">
+  <div class="kb-handle" id="kbHandle" role="button" tabindex="0" aria-label="collapse keyboard">
+    <span class="grip"></span>
+    <span class="h-i"><b>OCT</b><span id="hOct">C3</span></span>
+    <span class="h-i"><b>NOTE</b><span id="hNote" class="g">--</span></span>
+    <span class="chev" id="kbChev">▼</span>
+  </div>
   <div class="controls">
     <div class="stepper">
       <button id="octDn" aria-label="octave down">&minus;</button>
@@ -355,12 +500,13 @@ body{
       <button id="octUp" aria-label="octave up">+</button>
     </div>
     <button class="btn" id="sus">SUS</button>
+    <button class="btn" id="scopeBtn" style="color:var(--accent);border-color:var(--accent-dim)">⏛</button>
     <button class="btn accent" id="sweep">SWEEP</button>
     <button class="btn accent" id="chord">CHORD</button>
     <div class="vol"><span class="k">VOL</span><input id="vol" type="range" min="0" max="100" value="70"></div>
   </div>
-
   <div class="keys off" id="keys"></div>
+</div>
 
 <script type="module">
 /* ============================ config ============================ */
@@ -372,12 +518,14 @@ const CFG = {
   BASE_OCT : 3,
   OCT_MIN  : 0,
   OCT_MAX  : 7,
-  VEL_MIN  : 52,
-  VEL_MAX  : 169,
+  VEL_MIN  : 48,
+  VEL_MAX  : 127,          // was 169 — above the legal MIDI ceiling
   MASTER   : 1,
-  FFT      : 2048,
+  FFT      : 1024,         // was 2048 — halves the per-frame scope cost
   SMOOTH   : 0.8,
   DB_FLOOR : -90,
+  SCHED_TICK : 25,         // playback scheduler poll, ms
+  SCHED_AHEAD: 120,        // lookahead window, ms
 };
 
 const clamp = (v,a,b) => v < a ? a : v > b ? b : v;
@@ -416,19 +564,13 @@ window.toggleCollapse = function(id) {
   if (icon) icon.textContent = el.classList.contains('collapsed') ? '▶' : '▼';
 };
 
-async function initEngine(){
-  if (engineReady) return;
-  setStatus('load', 'booting engine…');
+/* Audio graph alone — no network, no soundfont. OSC mode needs only this. */
+async function initAudio(){
+  if(ctx) return;
   const AC = window.AudioContext || window.webkitAudioContext;
-  ctx = new AC();
+  try { ctx = new AC({ latencyHint: 'interactive' }); }
+  catch(e){ ctx = new AC(); }
   await ctx.resume();
-  const resp = await fetch(CFG.PROCESSOR);
-  if (!resp.ok) throw new Error('engine ' + resp.status);
-  const code = await resp.text();
-  const url = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
-  await ctx.audioWorklet.addModule(url);
-  URL.revokeObjectURL(url);
-  mod = await import(CFG.LIB_ESM);
   master = ctx.createGain();
   master.gain.value = masterVol;
   master.connect(ctx.destination);
@@ -440,10 +582,24 @@ async function initEngine(){
   analyser.smoothingTimeConstant = CFG.SMOOTH;
   preTap.connect(analyser);
   timeBuf = new Float32Array(analyser.fftSize);
+  Osc.init();
+  startScope();
+}
+
+async function initEngine(){
+  if (engineReady) return;
+  setStatus('load', 'booting engine…');
+  await initAudio();
+  const resp = await fetch(CFG.PROCESSOR);
+  if (!resp.ok) throw new Error('engine ' + resp.status);
+  const code = await resp.text();
+  const url = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
+  await ctx.audioWorklet.addModule(url);
+  URL.revokeObjectURL(url);
+  mod = await import(CFG.LIB_ESM);
   synth = new mod.WorkletSynthesizer(ctx);
   await synth.isReady;
   synth.connect(preTap);
-  startScope();
   engineReady = true;
 }
 
@@ -471,6 +627,7 @@ async function loadFile(file){
       voicePad = voiceBass = voiceLead = presets[0];
       populateVoiceSelects();
     }
+    setEngine('sf');
     setStatus('ready', presets.length + ' presets');
     $('generateBtn').disabled = false;
   } catch (err) {
@@ -488,7 +645,7 @@ function buildPresetList(){
   const rows = presets.filter(p => {
     if (!q) return true;
     const addr = pad3(p.bankMSB)+':'+pad3(p.bankLSB)+' '+pad3(p.program);
-    return p.name.toLowerCase().includes(q) || addr.includes(q);
+    return (p.name||'').toLowerCase().includes(q) || addr.includes(q);
   });
   $('count').textContent = rows.length;
   const box = $('plist');
@@ -528,7 +685,7 @@ function matchesFilter(p){
   const q = $('filter').value.trim().toLowerCase();
   if (!q) return true;
   const addr = pad3(p.bankMSB)+':'+pad3(p.bankLSB)+' '+pad3(p.program);
-  return p.name.toLowerCase().includes(q) || addr.includes(q);
+  return (p.name||'').toLowerCase().includes(q) || addr.includes(q);
 }
 
 function populateVoiceSelects() {
@@ -557,42 +714,163 @@ $('voicePad').addEventListener('change', e => { voicePad = presets[e.target.valu
 $('voiceBass').addEventListener('change', e => { voiceBass = presets[e.target.value]; setVoice(1, voiceBass); });
 $('voiceLead').addEventListener('change', e => { voiceLead = presets[e.target.value]; setVoice(2, voiceLead); });
 
-function setKeyOn(midi, on){ const el = keyEls.get(midi); if(el) el.classList.toggle('on', on); }
+/* ═════════════ BUILT-IN OSCILLATOR ENGINE ═════════════
+   So an image always plays something, with or without a .sf2 in memory.
+   Four channels, each its own bus + gentle lowpass, summed into preTap.
+   Per-note: one OscillatorNode + an ADSR gain, killed on release.       */
+const Osc = {
+  buses: {},            // channel -> {gain, filt}
+  live: new Map(),      // "ch:midi" -> [{osc,g}, ...]
+  wave: 'triangle',
+  // channel character: 1=bass 2=lead 3=pad 0/9=keyboard
+  spec: {
+    0: { wave:null, cut:7000, gain:0.30, a:0.006, d:0.10, s:0.72, r:0.28 },
+    1: { wave:'sine',     cut:1200, gain:0.42, a:0.010, d:0.14, s:0.80, r:0.30 },
+    2: { wave:null,       cut:6500, gain:0.24, a:0.004, d:0.09, s:0.55, r:0.22 },
+    3: { wave:'sine',     cut:2600, gain:0.16, a:0.120, d:0.30, s:0.85, r:0.90 },
+    9: { wave:'square',   cut:5000, gain:0.20, a:0.002, d:0.06, s:0.20, r:0.10 },
+  },
+  init(){
+    if(!ctx || this.buses[0]) return;
+    for(const ch of [0,1,2,3,9]){
+      const g = ctx.createGain();  g.gain.value = this.spec[ch].gain;
+      const f = ctx.createBiquadFilter();
+      f.type = 'lowpass'; f.frequency.value = this.spec[ch].cut; f.Q.value = 0.6;
+      f.connect(g); g.connect(preTap);
+      this.buses[ch] = { gain:g, filt:f };
+    }
+  },
+  hz(midi){ return 440 * Math.pow(2, (midi - 69) / 12); },
+  noteOn(ch, midi, vel){
+    if(!ctx) return;
+    this.init();
+    const sp = this.spec[ch] || this.spec[0];
+    const bus = this.buses[ch] || this.buses[0];
+    if(!bus) return;
+    const key = ch + ':' + midi;
+    if(this.live.has(key)) this.noteOff(ch, midi);   // retrigger cleanly
+    const t = ctx.currentTime;
+    const peak = clamp(vel / 127, 0, 1) * 0.9 + 0.05;
+
+    const nodes = [];
+    // main partial + a detuned twin an octave up for body (skipped on bass)
+    const parts = ch === 1 ? [[0, 1]] : [[0, 1], [1200, 0.22]];
+    for(const [cents, amp] of parts){
+      const o = ctx.createOscillator();
+      o.type = sp.wave || this.wave;
+      o.frequency.value = this.hz(midi);
+      o.detune.value = cents;
+      const g = ctx.createGain();
+      g.gain.cancelScheduledValues(t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(peak * amp, t + sp.a);
+      g.gain.setTargetAtTime(peak * amp * sp.s, t + sp.a, sp.d);
+      o.connect(g); g.connect(bus.filt);
+      o.start(t);
+      nodes.push({ osc:o, g });
+    }
+    this.live.set(key, nodes);
+    if(this.live.size > 48) this.trim();
+  },
+  noteOff(ch, midi){
+    const key = ch + ':' + midi;
+    const nodes = this.live.get(key);
+    if(!nodes) return;
+    this.live.delete(key);
+    const sp = this.spec[ch] || this.spec[0];
+    const t = ctx.currentTime;
+    for(const { osc, g } of nodes){
+      try{
+        g.gain.cancelScheduledValues(t);
+        g.gain.setValueAtTime(g.gain.value, t);
+        g.gain.setTargetAtTime(0.0001, t, sp.r / 4);
+        osc.stop(t + sp.r + 0.10);
+        osc.onended = ()=>{ try{ g.disconnect(); osc.disconnect(); }catch(e){} };
+      }catch(e){}
+    }
+  },
+  trim(){ const k = this.live.keys().next().value; if(k){ const [c,m] = k.split(':'); this.noteOff(+c, +m); } },
+  allOff(){ for(const k of [...this.live.keys()]){ const [c,m] = k.split(':'); this.noteOff(+c, +m); } },
+};
+
+/* ---- Engine routing -----------------------------------------------------
+   Everything that used to call synth.noteOn/noteOff directly goes through
+   these, so OSC and SOUNDFONT are interchangeable at every call site.    */
+let engineMode = 'osc';                       // 'osc' | 'sf'
+const sfLive = ()=> engineMode === 'sf' && ready;
+const canPlay = ()=> engineMode === 'osc' ? !!ctx : ready;
+
+function eNoteOn(ch, midi, vel){
+  const v = clamp(Math.round(vel), 1, 127);
+  if(sfLive()) synth.noteOn(ch, midi, v);
+  else Osc.noteOn(ch, midi, v);
+}
+function eNoteOff(ch, midi){
+  if(sfLive()) synth.noteOff(ch, midi);
+  else Osc.noteOff(ch, midi);
+}
+function eAllOff(){
+  Osc.allOff();
+  if(ready){ [0,1,2,3,9].forEach(ch=>{ try{ synth.controllerChange(ch,120,0); synth.controllerChange(ch,123,0); }catch(e){} }); }
+}
 function noteOnKey(midi, vel){
-  if (!ready) return;
+  if (!canPlay()) return;
   const c = heldCount.get(midi) || 0;
-  if (c === 0) synth.noteOn(st.channel, midi, vel);
+  if (c === 0) eNoteOn(st.channel, midi, vel);
   heldCount.set(midi, c+1);
   setKeyOn(midi, true);
   st.lastNote = midi; st.lastVel = vel;
   updateReadout();
 }
 function noteOffKey(midi){
-  if (!ready) return;
+  if (!canPlay()) return;
   const c = heldCount.get(midi) || 0;
-  if (c <= 1){ heldCount.delete(midi); synth.noteOff(st.channel, midi); setKeyOn(midi, false); }
+  if (c <= 1){ heldCount.delete(midi); eNoteOff(st.channel, midi); setKeyOn(midi, false); }
   else heldCount.set(midi, c-1);
   updateReadout();
 }
-function rawOn(midi, vel){ if(ready){ synth.noteOn(st.channel, midi, vel); setKeyOn(midi, true); } }
-function rawOff(midi){ if(ready){ synth.noteOff(st.channel, midi); setKeyOn(midi, false); } }
+function rawOn(midi, vel){ if(canPlay()){ eNoteOn(st.channel, midi, vel); setKeyOn(midi, true); } }
+function rawOff(midi){ if(canPlay()){ eNoteOff(st.channel, midi); setKeyOn(midi, false); } }
 
 function panic(){
   stopSweep();
-  [0,1,2,3,9].forEach(ch=>{ try{ synth.controllerChange(ch,120,0); synth.controllerChange(ch,123,0); }catch(e){} });
+  eAllOff();
   heldCount.clear(); pointers.clear();
   keyEls.forEach(el=>el.classList.remove('on'));
   updateReadout();
 }
-function updateReadout(){
-  $('rNote').textContent = st.lastNote == null ? '--' : noteName(st.lastNote);
-  $('rVel').textContent = st.lastVel == null ? '--' : st.lastVel;
-  $('rHeld').textContent = heldCount.size;
+/* Readout writes are coalesced. Previously every noteOn AND noteOff wrote
+   three textContent values immediately; in a fast run or a chord that's a
+   burst of style invalidations on the touch handler's own frame.          */
+let readoutDirty = false;
+const _ro = {};
+function updateReadout(){ readoutDirty = true; }
+function flushReadout(){
+  if(!readoutDirty) return;
+  readoutDirty = false;
+  if(!_ro.note){
+    _ro.note = $('rNote'); _ro.vel = $('rVel'); _ro.held = $('rHeld');
+    _ro.note2 = $('rNote2'); _ro.held2 = $('rHeld2');
+    _ro.hNote = $('hNote');
+  }
+  const n = st.lastNote == null ? '--' : noteName(st.lastNote);
+  const v = st.lastVel == null ? '--' : String(st.lastVel);
+  const h = String(heldCount.size);
+  _ro.note.textContent = n;
+  _ro.vel.textContent  = v;
+  _ro.held.textContent = h;
+  if(_ro.note2) _ro.note2.textContent = n;
+  if(_ro.held2) _ro.held2.textContent = h;
+  if(_ro.hNote) _ro.hNote.textContent = n;   // folded tray still shows the note
 }
 
 /* ============================ KEYBOARD ============================ */
 const WHITE = [0,2,4,5,7,9,11];
 const BLACK = {0:1,1:3,3:6,4:8,5:10};
+const BLACK_H = 0.60;          // matches .key.black { height:60% }
+let keyGeom = [];              // {midi, x0, x1, black} in 0..1 fractions
+let kbRect = null;             // cached bounding rect, refreshed per gesture
+
 function buildKeyboard(){
   const kb = $('keys');
   const w = kb.clientWidth || 360;
@@ -601,6 +879,7 @@ function buildKeyboard(){
   const baseMidi = 12 * (baseOct + 1);
   kb.innerHTML = '';
   keyEls.clear();
+  keyGeom = [];
   for (let i=0; i<whiteCount; i++){
     const oct = Math.floor(i/7), deg = i%7;
     const midi = baseMidi + oct*12 + WHITE[deg];
@@ -617,6 +896,7 @@ function buildKeyboard(){
     }
     kb.appendChild(el);
     keyEls.set(midi, el);
+    keyGeom.push({ midi, x0:i*whiteW/100, x1:(i+1)*whiteW/100, black:false });
   }
   const blackW = whiteW * 0.62;
   for (let i=0; i<whiteCount; i++){
@@ -631,51 +911,99 @@ function buildKeyboard(){
     el.dataset.midi = midi;
     kb.appendChild(el);
     keyEls.set(midi, el);
+    const bx0 = ((i+1)*whiteW - blackW/2)/100;
+    keyGeom.push({ midi, x0:bx0, x1:bx0 + blackW/100, black:true });
   }
+  // blacks first — they sit on top of the whites
+  keyGeom.sort((a,b)=> (b.black?1:0) - (a.black?1:0));
+  kbRect = null;
 }
 
-// Pointer events
-const keyAt = (x,y)=>{const e=document.elementFromPoint(x,y);return e?e.closest('.key'):null;};
-const velFrom = (el,y)=>{const r=el.getBoundingClientRect();const t=clamp((y-r.top)/r.height,0,1);return Math.round(CFG.VEL_MIN + t*(CFG.VEL_MAX-CFG.VEL_MIN));};
-function resume(){if(ctx&&ctx.state==='suspended')ctx.resume();}
+/* ---- Pointer events ----------------------------------------------------
+   Hit testing is pure arithmetic against cached key geometry. The previous
+   build called document.elementFromPoint() plus getBoundingClientRect() on
+   every pointerdown AND every pointermove; both force a synchronous layout
+   flush, which is what made notes trail the finger on iOS.                */
 const kb = $('keys');
+
+function refreshKbRect(){ kbRect = kb.getBoundingClientRect(); }
+
+// returns {midi, vel} or null — no DOM reads
+function hitKey(clientX, clientY){
+  if(!kbRect) refreshKbRect();
+  const r = kbRect;
+  if(r.width <= 0 || r.height <= 0) return null;
+  const fx = (clientX - r.left) / r.width;
+  const fy = clamp((clientY - r.top) / r.height, 0, 1);
+  if(fx < 0 || fx > 1) return null;
+  for(let i=0; i<keyGeom.length; i++){
+    const g = keyGeom[i];
+    if(fx < g.x0 || fx >= g.x1) continue;
+    if(g.black && fy > BLACK_H) continue;      // below the black key — fall through to white
+    const t = g.black ? clamp(fy / BLACK_H, 0, 1) : fy;
+    const vel = Math.round(CFG.VEL_MIN + t * (CFG.VEL_MAX - CFG.VEL_MIN));
+    return { midi: g.midi, vel: clamp(vel, 1, 127) };
+  }
+  return null;
+}
+
+/* First gesture anywhere boots the audio graph, so OSC mode is playable
+   without ever loading a soundfont. Safe to call repeatedly. */
+let bootingAudio = false;
+function resume(){
+  if(ctx){ if(ctx.state === 'suspended') ctx.resume(); return; }
+  if(bootingAudio) return;
+  bootingAudio = true;
+  initAudio().catch(e => setStatus('err', String(e.message || e)))
+             .finally(()=>{ bootingAudio = false; });
+}
+
 kb.addEventListener('pointerdown', e=>{
   e.preventDefault(); resume();
-  const k = keyAt(e.clientX, e.clientY); if(!k) return;
-  const midi = +k.dataset.midi;
-  pointers.set(e.pointerId, midi);
-  noteOnKey(midi, velFrom(k, e.clientY));
-});
+  refreshKbRect();                              // one layout read per gesture
+  const h = hitKey(e.clientX, e.clientY); if(!h) return;
+  try { kb.setPointerCapture(e.pointerId); } catch(err){}
+  pointers.set(e.pointerId, h.midi);
+  if(!ctx){ initAudio().then(()=>{ if(pointers.get(e.pointerId) === h.midi) noteOnKey(h.midi, h.vel); }); }
+  else noteOnKey(h.midi, h.vel);
+}, {passive:false});
+
 kb.addEventListener('pointermove', e=>{
   if(!pointers.has(e.pointerId)) return;
   e.preventDefault();
-  const k = keyAt(e.clientX, e.clientY);
-  const midi = k ? +k.dataset.midi : null;
+  const h = hitKey(e.clientX, e.clientY);
+  const midi = h ? h.midi : null;
   const prev = pointers.get(e.pointerId);
   if(midi !== prev){
     if(prev != null) noteOffKey(prev);
-    if(midi != null) noteOnKey(midi, velFrom(k, e.clientY));
+    if(midi != null) noteOnKey(midi, h.vel);
     pointers.set(e.pointerId, midi);
   }
-});
+}, {passive:false});
+
 function endPointer(e){
   if(!pointers.has(e.pointerId)) return;
   const midi = pointers.get(e.pointerId);
   if(midi != null) noteOffKey(midi);
   pointers.delete(e.pointerId);
+  try { kb.releasePointerCapture(e.pointerId); } catch(err){}
 }
 kb.addEventListener('pointerup', endPointer);
 kb.addEventListener('pointercancel', endPointer);
-kb.addEventListener('pointerleave', endPointer);
+// pointerleave is deliberately NOT bound: with pointer capture a finger that
+// slides past the edge of the keyboard keeps its note instead of cutting out.
+window.addEventListener('pointerup', endPointer);      // safety net
+window.addEventListener('blur', ()=>{ if(pointers.size) panic(); });
+window.addEventListener('scroll', ()=>{ kbRect = null; }, {passive:true});
 
 function stopSweep(){sweepTimers.forEach(clearTimeout);sweepTimers=[];}
 function sweep(){
-  if(!ready)return; resume();stopSweep();
+  if(!canPlay())return; resume();stopSweep();
   const base=12*(baseOct+1);const step=82,dur=165,span=25,vel=104;
   for(let i=0;i<span;i++){const m=base+i;if(m>127)break;sweepTimers.push(setTimeout(()=>rawOn(m,vel),i*step));sweepTimers.push(setTimeout(()=>rawOff(m),i*step+dur));}
 }
 function chord(){
-  if(!ready)return;resume();
+  if(!canPlay())return;resume();
   const root=clamp(12*(baseOct+1)+12,0,115);
   const tones=[0,4,7,11,14].map(n=>root+n).filter(m=>m<=127);
   tones.forEach(m=>rawOn(m,100));setTimeout(()=>tones.forEach(rawOff),1250);
@@ -685,14 +1013,58 @@ $('file').addEventListener('change', e=>{const f=e.target.files[0];if(f)loadFile
 $('filter').addEventListener('input', buildPresetList);
 $('octDn').addEventListener('click',()=>setOct(baseOct-1));
 $('octUp').addEventListener('click',()=>setOct(baseOct+1));
-function setOct(v){baseOct=clamp(v,CFG.OCT_MIN,CFG.OCT_MAX);$('octVal').textContent='C'+baseOct;if(ready)panic();buildKeyboard();}
-$('sus').addEventListener('click',()=>{sustainOn=!sustainOn;$('sus').classList.toggle('act',sustainOn);if(ready)synth.controllerChange(st.channel,64,sustainOn?127:0);});
+
+/* ---- keyboard tray fold ----------------------------------------------
+   Folding hides the controls row and the keys, leaving a 30px handle.
+   The freed height goes straight to the image stage via layoutPreview(),
+   so collapsing the keyboard actually buys you a bigger picture.      */
+let kbFolded = false;
+function setFold(on){
+  kbFolded = on;
+  document.querySelector('.kb-dock').classList.toggle('folded', on);
+  $('kbChev').textContent = on ? '\u25B2' : '\u25BC';
+  $('kbHandle').setAttribute('aria-label', on ? 'expand keyboard' : 'collapse keyboard');
+  if(on) panic();                      // don't strand held notes behind the fold
+  else { kbRect = null; buildKeyboard(); }
+  requestAnimationFrame(()=>{ measureDock(); layoutPreview(); sizeScope(); });
+}
+$('kbHandle').addEventListener('click', ()=>setFold(!kbFolded));
+$('kbHandle').addEventListener('keydown', e=>{
+  if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); setFold(!kbFolded); }
+});
+function setOct(v){
+  baseOct = clamp(v, CFG.OCT_MIN, CFG.OCT_MAX);
+  const lbl = 'C' + baseOct;
+  $('octVal').textContent = lbl;
+  const ho = $('hOct'); if(ho) ho.textContent = lbl;
+  panic();
+  if(!kbFolded) buildKeyboard();
+}
+$('sus').addEventListener('click',()=>{
+  sustainOn = !sustainOn;
+  $('sus').classList.toggle('act', sustainOn);
+  if(sfLive()) synth.controllerChange(st.channel, 64, sustainOn ? 127 : 0);
+  if(!sustainOn) heldCount.forEach((c,m)=>{ if(c===0) noteOffKey(m); });
+});
 $('sweep').addEventListener('click',sweep);
 $('chord').addEventListener('click',chord);
 $('vol').addEventListener('input',e=>{masterVol=e.target.value/100;if(master)master.gain.value=masterVol;});
 document.addEventListener('pointerdown', resume, {passive:true});
-window.addEventListener('resize', ()=>{buildKeyboard();sizeScope();});
-window.addEventListener('orientationchange', ()=>setTimeout(()=>{buildKeyboard();sizeScope();},250));
+let resizeT = null;
+function relayout(){
+  buildKeyboard(); sizeScope(); measureDock(); layoutPreview();
+}
+window.addEventListener('resize', ()=>{ clearTimeout(resizeT); resizeT = setTimeout(relayout, 120); });
+window.addEventListener('orientationchange', ()=>setTimeout(relayout, 300));
+
+/* The dock height was hardcoded at 180px in two places; content could hide
+   behind it and the scope popup sat at the wrong offset. Measure it. */
+function measureDock(){
+  const dock = document.querySelector('.kb-dock');
+  if(!dock) return;
+  const h = Math.ceil(dock.getBoundingClientRect().height);
+  if(h > 0) document.documentElement.style.setProperty('--dockH', h + 'px');
+}
 
 // Scope
 function sizeScope(){
@@ -701,18 +1073,41 @@ function sizeScope(){
   scopeCv.width=Math.max(1,Math.round(r.width*DPR));
   scopeCv.height=Math.max(1,Math.round((r.height||1)*DPR));
 }
-function startScope(){if(rafOn)return;rafOn=true;requestAnimationFrame(scopeFrame);}
-function scopeFrame(){
+/* ---- Scope ---------------------------------------------------------------
+   The old loop ran unconditionally at 60fps whether or not the scope was on
+   screen, and used canvas shadowBlur (a full gaussian per stroke) — the
+   single most expensive thing in the file on iOS Safari, and the main
+   reason keys felt like they trailed the touch. Now:
+     · nothing is drawn while the popup is closed
+     · the signal readout is throttled to ~10Hz
+     · glow is faked with a wide translucent stroke instead of shadowBlur   */
+let scopeOpen = false, lastSigWrite = 0;
+function startScope(){ if(rafOn) return; rafOn = true; requestAnimationFrame(scopeFrame); }
+function scopeFrame(ts){
   requestAnimationFrame(scopeFrame);
-  if(!scopeCx)return;
-  let rms=CFG.DB_FLOOR,live=false;
-  if(analyser){analyser.getFloatTimeDomainData(timeBuf);rms=rmsDb(timeBuf);live=true;}
-  const lvl=clamp((rms-CFG.DB_FLOOR)/(-6-CFG.DB_FLOOR),0,1);
-  $('rSig').textContent = (live && rms>CFG.DB_FLOOR+0.5)?Math.round(rms)+' dB':'-- dB';
-  $('sigbar').style.width = (2+lvl*98).toFixed(0)+'%';
-  dispHue = lerp(dispHue, lerp(150,0,lvl), 0.15);
+  flushReadout();
+  flushPlayhead(ts);
+  if(!analyser) return;
+
+  const needSig = scopeOpen || (ts - lastSigWrite) > 100;
+  if(!scopeOpen && !needSig) return;
+
+  analyser.getFloatTimeDomainData(timeBuf);
+  const rms = rmsDb(timeBuf);
+  const lvl = clamp((rms - CFG.DB_FLOOR)/(-6 - CFG.DB_FLOOR), 0, 1);
+
+  if(needSig){
+    lastSigWrite = ts;
+    if(!_ro.sig){ _ro.sig = $('rSig'); _ro.bar = $('sigbar'); _ro.sig2 = $('rSig2'); }
+    const txt = rms > CFG.DB_FLOOR + 0.5 ? Math.round(rms)+' dB' : '-- dB';
+    if(_ro.sigTxt !== txt){ _ro.sigTxt = txt; _ro.sig.textContent = txt; if(_ro.sig2) _ro.sig2.textContent = txt; }
+    _ro.bar.style.width = (2 + lvl*98).toFixed(0)+'%';
+  }
+  if(!scopeOpen || !scopeCx) return;
+
+  dispHue = lerp(dispHue, lerp(150, 0, lvl), 0.15);
   const [R,G,B] = hueRGB(dispHue, 0.85, 1);
-  drawScope(R,G,B,live);
+  drawScope(R,G,B,true);
 }
 function drawScope(R,G,B,live){
   const w=scopeCv.width,h=scopeCv.height,cx=scopeCx;
@@ -721,14 +1116,14 @@ function drawScope(R,G,B,live){
   cx.beginPath();cx.moveTo(0,h/2);cx.lineTo(w,h/2);cx.stroke();
   cx.strokeStyle='rgba(24,38,66,0.5)';
   for(let i=1;i<4;i++){const y=h*i/4;cx.beginPath();cx.moveTo(0,y);cx.lineTo(w,y);cx.stroke();}
-  const col='rgb('+R+','+G+','+B+')';
-  cx.lineWidth=2*DPR;cx.strokeStyle=col;cx.shadowBlur=12*DPR;cx.shadowColor=col;
   cx.beginPath();
   if(live&&timeBuf){
     const N=timeBuf.length,step=Math.max(1,(N/w)|0);let x=0;
     for(let i=0;i<N;i+=step){const y=h/2-timeBuf[i]*h*0.46;x===0?cx.moveTo(0,y):cx.lineTo(x,y);x=i/(N-1)*w;}
   }else{cx.moveTo(0,h/2);cx.lineTo(w,h/2);}
-  cx.stroke();cx.shadowBlur=0;
+  // cheap glow: wide translucent pass, then the sharp core
+  cx.lineWidth=6*DPR; cx.strokeStyle='rgba('+R+','+G+','+B+',0.20)'; cx.stroke();
+  cx.lineWidth=2*DPR; cx.strokeStyle='rgb('+R+','+G+','+B+')';        cx.stroke();
 }
 
 /* ============================ IMAGE COMPOSITION ============================ */
@@ -743,6 +1138,7 @@ const MODES = {   // *** FIXED ***
   penta_major: [0, 2, 4, 7, 9],
   penta_minor: [0, 3, 5, 7, 10],
   japanese:    [0, 1, 5, 7, 8],
+  chromatic:   [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
 };
 const NOTE_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 
@@ -759,8 +1155,8 @@ function getParams() {
     rootHueOffset: +$('rootHueOffset').value,
     usePad: $('usePad').checked,
     useBass: $('useBass').checked,
-    useLead: $('useLead').checked,
-    usePerc: $('usePerc').checked,
+    useLead: $('useLead').checked, // dedicated percussion was removed; transient detail is shared by bass/lead
+    usePerc: false,
     padLo: +$('padLo').value, padHi: +$('padHi').value,
     bassLo: +$('bassLo').value, bassHi: +$('bassHi').value,
     leadLo: +$('leadLo').value, leadHi: +$('leadHi').value,
@@ -778,6 +1174,7 @@ function getParams() {
     percTexGate: +$('percTexGate').value,
     percEdgeGate: +$('percEdgeGate').value,
     scaleLock: $('scaleLock').checked,
+    freeRead: $('freeRead').checked,
   };
 }
 
@@ -795,56 +1192,812 @@ function getParams() {
   }
 });
 
-function rgbToHsv(r,g,b) {
-  r/=255;g/=255;b/=255;
-  const max=Math.max(r,g,b),min=Math.min(r,g,b),d=max-min;
-  let h=0;
-  if(d!==0){
-    if(max===r)h=((g-b)/d)%6;
-    else if(max===g)h=(b-r)/d+2;
-    else h=(r-g)/d+4;
+/* ═════════════ IMAGE FIELD ANALYZER v2 ENGINE ═════════════
+   BT.709 luminance · 16-bin histogram · Laplacian texture ·
+   directional Sobel · circular hue · median-cut palette ·
+   Shannon entropy · content-bounds · quadtree · spatial luminance ·
+   section detection · multi-dimensional musical mapping          */
+
+const ImageField = {
+
+  /* ── BT.709 perceptual luminance ── */
+  lum(r,g,b){ return 0.2126*r + 0.7152*g + 0.0722*b; },
+
+  /* ── RGB → HSV ── */
+  rgbToHsv(r,g,b){
+    r/=255; g/=255; b/=255;
+    const mx=Math.max(r,g,b), mn=Math.min(r,g,b), d=mx-mn;
+    let h=0;
+    if(d>0){
+      if(mx===r) h=((g-b)/d+6)%6;
+      else if(mx===g) h=(b-r)/d+2;
+      else h=(r-g)/d+4;
+      h*=60;
+    }
+    return { h, s:mx>0?d/mx:0, v:mx };
+  },
+
+  /* ── Sobel edge with directional components ── */
+  sobel(gray,W,H,x,y){
+    if(x<=0||x>=W-1||y<=0||y>=H-1) return {mag:0,gx:0,gy:0};
+    const i=y*W+x;
+    const a=gray[i-W-1],b=gray[i-W],c=gray[i-W+1];
+    const d=gray[i-1],f=gray[i+1];
+    const g=gray[i+W-1],h=gray[i+W],k=gray[i+W+1];
+    const gx=(c+2*f+k)-(a+2*d+g);
+    const gy=(g+2*h+k)-(a+2*b+c);
+    return { mag:Math.sqrt(gx*gx+gy*gy), gx, gy };
+  },
+
+  /* ── Laplacian (texture complexity) ── */
+  laplacian(gray,W,H,x,y){
+    if(x<=0||x>=W-1||y<=0||y>=H-1) return 0;
+    const i=y*W+x;
+    return Math.abs(
+      -4*gray[i] + gray[i-1] + gray[i+1] + gray[i-W] + gray[i+W]
+    );
+  },
+
+  /* ── Content bounds (skip dark borders) ── */
+  contentBounds(gray,W,H,thresh=12){
+    let x0=W,y0=H,x1=0,y1=0;
+    for(let y=0;y<H;y++){
+      for(let x=0;x<W;x++){
+        if(gray[y*W+x]>thresh){
+          if(x<x0)x0=x; if(x>x1)x1=x;
+          if(y<y0)y0=y; if(y>y1)y1=y;
+        }
+      }
+    }
+    if(x1<=x0||y1<=y0) return {x0:0,y0:0,x1:W-1,y1:H-1,cropped:false};
+    return {x0:Math.max(0,x0-1),y0:Math.max(0,y0-1),x1:Math.min(W-1,x1+1),y1:Math.min(H-1,y1+1),cropped:true};
+  },
+
+  /* ── Circular hue statistics (mean + diversity) ── */
+  hueStats(hueVecX,hueVecY,totalWeight){
+    if(totalWeight<.001) return {deg:0,strength:0,diversity:1};
+    const mag=Math.sqrt(hueVecX*hueVecX+hueVecY*hueVecY);
+    let deg=0;
+    if(mag>0){ deg=Math.atan2(hueVecY,hueVecX)*180/Math.PI; if(deg<0)deg+=360; }
+    /* diversity: 0=all same hue, 1=uniformly spread. inverse of concentration */
+    const concentration=clamp(mag/totalWeight,0,1);
+    return { deg, strength:concentration, diversity:1-concentration };
+  },
+
+  /* ── Shannon entropy of brightness ── */
+  entropy(histogram,total){
+    if(total<=0) return 0;
+    let e=0;
+    for(let i=0;i<histogram.length;i++){
+      const p=histogram[i]/total;
+      if(p>0) e-=p*Math.log2(p);
+    }
+    return e;
+  },
+
+  /* ── Median-cut color palette extraction (5 colors) ── */
+  extractPalette(data,W,H,bounds,maxColors=5){
+    const pixels=[];
+    const step=Math.max(1,Math.floor((bounds.x1-bounds.x0)*(bounds.y1-bounds.y0)/2000));
+    let idx=0;
+    for(let y=bounds.y0;y<=bounds.y1;y++){
+      for(let x=bounds.x0;x<=bounds.x1;x++){
+        idx++;
+        if(idx%step!==0) continue;
+        const i=(y*W+x)*4;
+        const r=data[i],g=data[i+1],b=data[i+2];
+        /* skip near-black and near-white */
+        const lum=(r+g+b)/3;
+        if(lum<15||lum>240) continue;
+        pixels.push([r,g,b]);
+      }
+    }
+    if(pixels.length<maxColors) return pixels.map(p=>({r:p[0],g:p[1],b:p[2],count:1}));
+    /* median-cut */
+    function medianCut(box,depth){
+      if(depth<=0||box.length<=1){
+        let sr=0,sg=0,sb=0;
+        for(const p of box){sr+=p[0];sg+=p[1];sb+=p[2]}
+        const n=box.length;
+        return [{r:Math.round(sr/n),g:Math.round(sg/n),b:Math.round(sb/n),count:n}];
+      }
+      /* find channel with widest range */
+      let ranges=[0,0,0];
+      for(let c=0;c<3;c++){
+        let mn=255,mx=0;
+        for(const p of box){mn=Math.min(mn,p[c]);mx=Math.max(mx,p[c])}
+        ranges[c]=mx-mn;
+      }
+      const ch=ranges[0]>=ranges[1]&&ranges[0]>=ranges[2]?0:ranges[1]>=ranges[2]?1:2;
+      box.sort((a,b)=>a[ch]-b[ch]);
+      const mid=Math.floor(box.length/2);
+      return [...medianCut(box.slice(0,mid),depth-1),...medianCut(box.slice(mid),depth-1)];
+    }
+    const cuts=Math.ceil(Math.log2(maxColors));
+    let result=medianCut(pixels,cuts);
+    result.sort((a,b)=>b.count-a.count);
+    return result.slice(0,maxColors);
+  },
+
+  /* ── Per-row feature extraction ── */
+  extractRow(data,gray,W,H,y,bounds){
+    const x0=bounds.x0, x1=bounds.x1;
+    const n=Math.max(1,x1-x0+1);
+    const step=Math.max(1,Math.floor(n/120));
+    let lumSum=0, satSum=0, contrastMin=255, contrastMax=0;
+    let edgeSum=0, edgeH=0, edgeV=0, lapSum=0, edgeCount=0;
+    let hueVX=0, hueVY=0, hueWeight=0;
+    let samples=0;
+
+    for(let x=x0;x<=x1;x+=step){
+      const i=(y*W+x)*4;
+      const r=data[i],g=data[i+1],b=data[i+2];
+      const L=ImageField.lum(r,g,b);
+      lumSum+=L;
+      contrastMin=Math.min(contrastMin,L);
+      contrastMax=Math.max(contrastMax,L);
+
+      const hsv=ImageField.rgbToHsv(r,g,b);
+      satSum+=hsv.s;
+      /* hue accumulation weighted by saturation × value (grey pixels don't count) */
+      if(hsv.s>0.08&&hsv.v>0.06){
+        const wt=hsv.s*hsv.v;
+        const rad=hsv.h*Math.PI/180;
+        hueVX+=Math.cos(rad)*wt;
+        hueVY+=Math.sin(rad)*wt;
+        hueWeight+=wt;
+      }
+
+      const sob=ImageField.sobel(gray,W,H,x,y);
+      edgeSum+=sob.mag;
+      edgeH+=Math.abs(sob.gx);
+      edgeV+=Math.abs(sob.gy);
+      lapSum+=ImageField.laplacian(gray,W,H,x,y);
+      edgeCount++;
+      samples++;
+    }
+
+    const hue=ImageField.hueStats(hueVX,hueVY,hueWeight);
+    return {
+      luminance: lumSum/(samples*255),
+      saturation: satSum/samples,
+      contrast: (contrastMax-contrastMin)/255,
+      edgeDensity: clamp(edgeSum/(edgeCount*180),0,1),
+      edgeHBias: edgeCount?(edgeH/(edgeH+edgeV+.001)):0.5,
+      textureGrain: clamp(lapSum/(edgeCount*60),0,1),
+      hue: hue.deg,
+      hueStrength: hue.strength,
+      yNorm: y/H
+    };
+  },
+
+  /* ── Per-column feature extraction ── */
+  extractCol(data,gray,W,H,x,bounds){
+    const y0=bounds.y0, y1=bounds.y1;
+    const n=Math.max(1,y1-y0+1);
+    const step=Math.max(1,Math.floor(n/120));
+    let lumSum=0, satSum=0, contrastMin=255, contrastMax=0;
+    let edgeSum=0, edgeH=0, edgeV=0, lapSum=0, edgeCount=0;
+    let hueVX=0, hueVY=0, hueWeight=0;
+    let samples=0;
+
+    for(let y=y0;y<=y1;y+=step){
+      const i=(y*W+x)*4;
+      const r=data[i],g=data[i+1],b=data[i+2];
+      const L=ImageField.lum(r,g,b);
+      lumSum+=L;
+      contrastMin=Math.min(contrastMin,L);
+      contrastMax=Math.max(contrastMax,L);
+
+      const hsv=ImageField.rgbToHsv(r,g,b);
+      satSum+=hsv.s;
+      if(hsv.s>0.08&&hsv.v>0.06){
+        const wt=hsv.s*hsv.v;
+        const rad=hsv.h*Math.PI/180;
+        hueVX+=Math.cos(rad)*wt;
+        hueVY+=Math.sin(rad)*wt;
+        hueWeight+=wt;
+      }
+
+      const sob=ImageField.sobel(gray,W,H,x,y);
+      edgeSum+=sob.mag;
+      edgeH+=Math.abs(sob.gx);
+      edgeV+=Math.abs(sob.gy);
+      lapSum+=ImageField.laplacian(gray,W,H,x,y);
+      edgeCount++;
+      samples++;
+    }
+
+    const hue=ImageField.hueStats(hueVX,hueVY,hueWeight);
+    return {
+      luminance: lumSum/(samples*255),
+      saturation: satSum/samples,
+      contrast: (contrastMax-contrastMin)/255,
+      edgeDensity: clamp(edgeSum/(edgeCount*180),0,1),
+      edgeHBias: edgeCount?(edgeH/(edgeH+edgeV+.001)):0.5,
+      textureGrain: clamp(lapSum/(edgeCount*60),0,1),
+      hue: hue.deg,
+      hueStrength: hue.strength,
+      xNorm: x/W
+    };
+  },
+
+  /* ── Adaptive quadtree decomposition ──
+     Subdivide visually complex regions; preserve large coherent regions. */
+  buildQuadTree(data,gray,W,H,bounds,maxDepth=6,varThresh=0.008){
+    const IF=ImageField;
+    function build(x0,y0,x1,y1,depth,parentLum){
+      const rw=x1-x0, rh=y1-y0;
+      if(rw<4||rh<4) return null;
+      const area=rw*rh;
+      const step=Math.max(1,Math.floor(area/300));
+      let lSum=0,lSqSum=0,sSum=0,n=0;
+      let hvx=0,hvy=0,hw=0,eSum=0,lapS=0,eCnt=0,idx=0;
+      for(let y=y0;y<y1;y++){
+        for(let x=x0;x<x1;x++){
+          idx++; if(idx%step!==0) continue;
+          const i=(y*W+x)*4;
+          const r=data[i],g=data[i+1],b=data[i+2];
+          const L=IF.lum(r,g,b);
+          lSum+=L; lSqSum+=L*L;
+          const hsv=IF.rgbToHsv(r,g,b); sSum+=hsv.s;
+          if(hsv.s>.08&&hsv.v>.06){
+            const wt=hsv.s*hsv.v, rad=hsv.h*Math.PI/180;
+            hvx+=Math.cos(rad)*wt; hvy+=Math.sin(rad)*wt; hw+=wt;
+          }
+          const sob=IF.sobel(gray,W,H,x,y);
+          eSum+=sob.mag; lapS+=IF.laplacian(gray,W,H,x,y); eCnt++; n++;
+        }
+      }
+      if(!n) return null;
+      const mean=lSum/(n*255);
+      const variance=Math.max(0,lSqSum/n-(lSum/n)**2)/(255*255);
+      const hue=IF.hueStats(hvx,hvy,hw);
+      const node={x0,y0,x1,y1,depth,luminance:mean,variance,
+        relLuminance:mean-(parentLum==null?mean:parentLum),
+        saturation:sSum/n,hue:hue.deg,hueStrength:hue.strength,
+        edgeDensity:clamp(eSum/(eCnt*180),0,1),
+        textureGrain:clamp(lapS/(eCnt*60),0,1),area,children:null,isLeaf:true};
+      if(depth<maxDepth&&variance>varThresh&&rw>8&&rh>8){
+        const mx=Math.floor((x0+x1)/2), my=Math.floor((y0+y1)/2);
+        const kids=[
+          build(x0,y0,mx,my,depth+1,mean),
+          build(mx,y0,x1,my,depth+1,mean),
+          build(x0,my,mx,y1,depth+1,mean),
+          build(mx,my,x1,y1,depth+1,mean)
+        ].filter(Boolean);
+        if(kids.length){node.children=kids;node.isLeaf=false;}
+      }
+      return node;
+    }
+    return build(bounds.x0,bounds.y0,bounds.x1+1,bounds.y1+1,0,null);
+  },
+
+  quadLeaves(node){
+    if(!node) return [];
+    if(node.isLeaf) return [node];
+    return node.children.flatMap(c=>ImageField.quadLeaves(c));
+  },
+
+  /* ── 2D luminance neighborhoods ── */
+  analyzeSpatialLuminance(gray,W,H,bounds,gridSize=16){
+    const bx0=bounds.x0,by0=bounds.y0;
+    const cw=bounds.x1-bx0+1,ch=bounds.y1-by0+1;
+    const cellW=Math.max(4,Math.floor(cw/gridSize));
+    const cellH=Math.max(4,Math.floor(ch/gridSize));
+    const gw=Math.max(1,Math.ceil(cw/cellW)),gh=Math.max(1,Math.ceil(ch/cellH));
+    const grid=[];
+    for(let gy=0;gy<gh;gy++) for(let gx=0;gx<gw;gx++){
+      const rx=bx0+gx*cellW,ry=by0+gy*cellH;
+      const ex=Math.min(bounds.x1+1,rx+cellW),ey=Math.min(bounds.y1+1,ry+cellH);
+      let sum=0,n=0;
+      const area=Math.max(1,(ex-rx)*(ey-ry)),step=Math.max(1,Math.floor(area/80));
+      let k=0;
+      for(let y=ry;y<ey;y++) for(let x=rx;x<ex;x++){k++;if(k%step)continue;sum+=gray[y*W+x];n++;}
+      grid.push({gx,gy,rx,ry,cellW:ex-rx,cellH:ey-ry,luminance:n?sum/(n*255):0,
+        relLuminance:0,gradientDir:{dx:0,dy:0},classification:'neutral',neighborContrast:0});
+    }
+    const get=(x,y)=>x>=0&&x<gw&&y>=0&&y<gh?grid[y*gw+x]:null;
+    const globalMean=grid.reduce((s,c)=>s+c.luminance,0)/(grid.length||1);
+    for(const c of grid){
+      let ns=0,nc=0;
+      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(dx||dy){const q=get(c.gx+dx,c.gy+dy);if(q){ns+=q.luminance;nc++;}}
+      const nm=nc?ns/nc:globalMean;c.relLuminance=c.luminance-nm;c.neighborContrast=Math.abs(c.relLuminance);
+      const l=get(c.gx-1,c.gy),r=get(c.gx+1,c.gy),u=get(c.gx,c.gy-1),d=get(c.gx,c.gy+1);
+      c.gradientDir={dx:(r?r.luminance:c.luminance)-(l?l.luminance:c.luminance),dy:(d?d.luminance:c.luminance)-(u?u.luminance:c.luminance)};
+      const gm=Math.hypot(c.gradientDir.dx,c.gradientDir.dy),below=c.luminance<globalMean;
+      if(!below)c.classification=c.neighborContrast>.08?'peak':gm>.06?'rise':'plateau';
+      else if(c.neighborContrast>.08)c.classification='island';
+      else if(gm>.06){const bias=Math.abs(c.gradientDir.dx)-Math.abs(c.gradientDir.dy);c.classification=bias>.02?'valley_h':bias<-.02?'valley_v':'gradient';}
+      else c.classification=c.neighborContrast<.02?'floor':'shadow';
+    }
+    const darkTypes=new Set(['island','valley_h','valley_v','gradient','floor','shadow']);
+    const visited=new Uint8Array(grid.length),darkRegions=[];
+    for(let i=0;i<grid.length;i++){
+      if(visited[i]||!darkTypes.has(grid[i].classification))continue;
+      const cells=[],classes={},queue=[i];visited[i]=1;
+      while(queue.length){const ci=queue.shift(),c=grid[ci];cells.push(c);classes[c.classification]=(classes[c.classification]||0)+1;const x=ci%gw,y=Math.floor(ci/gw);
+        for(const [dx,dy] of [[-1,0],[1,0],[0,-1],[0,1]]){const nx=x+dx,ny=y+dy;if(nx<0||nx>=gw||ny<0||ny>=gh)continue;const ni=ny*gw+nx;if(!visited[ni]&&darkTypes.has(grid[ni].classification)){visited[ni]=1;queue.push(ni);}}
+      }
+      let minGx=gw,maxGx=0,minGy=gh,maxGy=0,avgLum=0;for(const c of cells){minGx=Math.min(minGx,c.gx);maxGx=Math.max(maxGx,c.gx);minGy=Math.min(minGy,c.gy);maxGy=Math.max(maxGy,c.gy);avgLum+=c.luminance;}avgLum/=cells.length||1;
+      const spanX=maxGx-minGx+1,spanY=maxGy-minGy+1,aspect=spanX/(spanY||1),compactness=cells.length/(spanX*spanY||1);
+      let dom='floor',dc=0;for(const [k,v] of Object.entries(classes))if(v>dc){dc=v;dom=k;}
+      let behavior='sustain';if(compactness>.7&&cells.length<=4)behavior='staccato';else if(aspect>1.8)behavior='walking';else if(aspect<.55)behavior='rhythmic';else if(compactness<.4)behavior='scattered';else if(cells.length>8)behavior='drone';else behavior='legato';
+      darkRegions.push({cells,classes,bounds:{minGx,maxGx,minGy,maxGy},span:{x:spanX,y:spanY},aspect,compactness,avgLuminance:avgLum,relToGlobal:avgLum-globalMean,dominantClass:dom,bassBehavior:behavior,size:cells.length});
+    }
+    darkRegions.sort((a,b)=>b.size-a.size);
+    return {grid,gw,gh,cellW,cellH,globalMean,darkRegions};
+  },
+
+  /* ── Section boundary detection (feature-vector derivatives) ── */
+  detectSections(rows,minSections=3,maxSections=12){
+    if(rows.length<minSections*2) return [{start:0,end:rows.length-1}];
+    /* compute feature distance between adjacent rows */
+    const dists=[];
+    for(let i=1;i<rows.length;i++){
+      const a=rows[i-1], b=rows[i];
+      const d=Math.sqrt(
+        1.4*(a.luminance-b.luminance)**2 +
+        0.8*(a.saturation-b.saturation)**2 +
+        0.6*(a.edgeDensity-b.edgeDensity)**2 +
+        0.5*(a.textureGrain-b.textureGrain)**2 +
+        0.3*(a.contrast-b.contrast)**2
+      );
+      dists.push(d);
+    }
+    /* find peaks in distance (= visual boundaries) */
+    const peaks=[];
+    const smoothW=3;
+    for(let i=smoothW;i<dists.length-smoothW;i++){
+      let isMax=true, val=dists[i];
+      for(let j=-smoothW;j<=smoothW;j++){
+        if(j!==0&&dists[i+j]>=val){isMax=false;break}
+      }
+      if(isMax&&val>0.03) peaks.push({idx:i,val});
+    }
+    peaks.sort((a,b)=>b.val-a.val);
+    /* take top N boundaries */
+    const nBounds=clamp(peaks.length,minSections-1,maxSections-1);
+    let boundaries=peaks.slice(0,nBounds).map(p=>p.idx).sort((a,b)=>a-b);
+    /* build sections */
+    const sections=[{start:0,end:boundaries.length?boundaries[0]-1:rows.length-1}];
+    for(let i=0;i<boundaries.length;i++){
+      sections.push({
+        start:boundaries[i],
+        end:i<boundaries.length-1?boundaries[i+1]-1:rows.length-1
+      });
+    }
+    return sections;
+  },
+
+  /* ═══════════════════════════════════════════════════════════════
+     MAIN ANALYSIS ENTRY POINT
+     ═══════════════════════════════════════════════════════════════ */
+  analyze(imageData, W, H){
+    const data=imageData.data;
+    const t0=performance.now();
+
+    /* ── 1. Grayscale buffer (BT.709) ── */
+    const gray=new Float32Array(W*H);
+    for(let i=0;i<gray.length;i++){
+      const j=i*4;
+      gray[i]=ImageField.lum(data[j],data[j+1],data[j+2]);
+    }
+
+    /* ── 2. Content bounds ── */
+    const bounds=ImageField.contentBounds(gray,W,H);
+
+    /* ── 3. Global statistics ── */
+    const bx0=bounds.x0, by0=bounds.y0, bx1=bounds.x1, by1=bounds.y1;
+    const contentW=bx1-bx0+1, contentH=by1-by0+1;
+    const HIST_BINS=16;
+    const brHistogram=new Uint32Array(HIST_BINS);
+    let lumSum=0, lumSqSum=0, satSum=0, satSqSum=0;
+    let warmEnergy=0, coolEnergy=0;
+    let hueVX=0, hueVY=0, hueWeight=0;
+    let edgeMagSum=0, edgeHSum=0, edgeVSum=0, lapSumGlobal=0;
+    let weightX=0, weightY=0, weightSum=0;
+    let pixCount=0, edgeCount=0;
+
+    const step=Math.max(1,Math.floor(contentW*contentH/50000));
+    let sIdx=0;
+    for(let y=by0;y<=by1;y++){
+      for(let x=bx0;x<=bx1;x++){
+        sIdx++;
+        if(sIdx%step!==0) continue;
+        const i=(y*W+x)*4;
+        const r=data[i],g=data[i+1],b=data[i+2];
+        const L=ImageField.lum(r,g,b);
+        lumSum+=L; lumSqSum+=L*L;
+        brHistogram[clamp(Math.floor(L/255*HIST_BINS),0,HIST_BINS-1)]++;
+
+        const hsv=ImageField.rgbToHsv(r,g,b);
+        satSum+=hsv.s; satSqSum+=hsv.s*hsv.s;
+
+        /* warm/cool weighted by saturation */
+        if(hsv.s>0.1){
+          if(hsv.h<60||hsv.h>300) warmEnergy+=hsv.s*hsv.v;
+          else if(hsv.h>150&&hsv.h<270) coolEnergy+=hsv.s*hsv.v;
+        }
+
+        /* hue accumulation */
+        if(hsv.s>0.08&&hsv.v>0.06){
+          const wt=hsv.s*hsv.v;
+          const rad=hsv.h*Math.PI/180;
+          hueVX+=Math.cos(rad)*wt;
+          hueVY+=Math.sin(rad)*wt;
+          hueWeight+=wt;
+        }
+
+        /* edges + texture */
+        const sob=ImageField.sobel(gray,W,H,x,y);
+        edgeMagSum+=sob.mag;
+        edgeHSum+=Math.abs(sob.gx);
+        edgeVSum+=Math.abs(sob.gy);
+        lapSumGlobal+=ImageField.laplacian(gray,W,H,x,y);
+        edgeCount++;
+
+        /* visual weight center */
+        weightX+=L*x; weightY+=L*y; weightSum+=L;
+        pixCount++;
+      }
+    }
+
+    const brMean=lumSum/(pixCount*255);
+    const brStd=Math.sqrt(Math.max(0,lumSqSum/pixCount-(lumSum/pixCount)**2))/255;
+    const satMean=satSum/pixCount;
+    const satStd=Math.sqrt(Math.max(0,satSqSum/pixCount-(satSum/pixCount)**2));
+    const warmCoolRatio=(warmEnergy+coolEnergy)>0?warmEnergy/(warmEnergy+coolEnergy):0.5;
+    const hue=ImageField.hueStats(hueVX,hueVY,hueWeight);
+    const edgeDensity=clamp(edgeMagSum/(edgeCount*180),0,1);
+    const edgeHBias=edgeCount?edgeHSum/(edgeHSum+edgeVSum+.001):0.5;
+    const textureComplexity=clamp(lapSumGlobal/(edgeCount*60),0,1);
+    const visualEntropy=ImageField.entropy(brHistogram,pixCount);
+    const weightCenter={
+      x:weightSum>0?(weightX/weightSum-bx0)/contentW:0.5,
+      y:weightSum>0?(weightY/weightSum-by0)/contentH:0.5
+    };
+
+    /* ── 4. Color palette ── */
+    const palette=ImageField.extractPalette(data,W,H,bounds,5);
+    const totalPalettePx=palette.reduce((s,c)=>s+c.count,0);
+    palette.forEach(c=>c.pct=totalPalettePx?c.count/totalPalettePx:0);
+
+    /* ── 5. Brightness distribution shape ── */
+    const histTotal=Array.from(brHistogram).reduce((s,v)=>s+v,0);
+    const histNorm=Array.from(brHistogram).map(v=>histTotal?v/histTotal:0);
+    /* find peak bin */
+    let peakBin=0, peakVal=0;
+    for(let i=0;i<HIST_BINS;i++){if(histNorm[i]>peakVal){peakVal=histNorm[i];peakBin=i}}
+    /* bimodality: measure second peak distance from first */
+    let lowMass=0, highMass=0;
+    for(let i=0;i<8;i++) lowMass+=histNorm[i];
+    for(let i=8;i<16;i++) highMass+=histNorm[i];
+    const bimodality=1-Math.abs(lowMass-highMass);
+
+    /* brightness class */
+    let brClass='mid-key';
+    if(brMean>0.65) brClass='high-key';
+    else if(brMean<0.25) brClass='low-key';
+    else if(bimodality>0.85&&brStd>0.2) brClass='bimodal';
+
+    /* ── 6. Per-row and per-column analysis ── */
+    const RES=Math.max(2,Math.floor(contentH/80));
+    const rows=[];
+    for(let y=by0;y<=by1;y+=RES){
+      rows.push(ImageField.extractRow(data,gray,W,H,y,bounds));
+    }
+    const CRES=Math.max(2,Math.floor(contentW/80));
+    const cols=[];
+    for(let x=bx0;x<=bx1;x+=CRES){
+      cols.push(ImageField.extractCol(data,gray,W,H,x,bounds));
+    }
+
+    /* ── 7. Section detection ── */
+    const sections=ImageField.detectSections(rows);
+
+    /* ── 7b. Spatial structure ── */
+    const quadTree=ImageField.buildQuadTree(data,gray,W,H,bounds);
+    const quadLeaves=ImageField.quadLeaves(quadTree);
+    const spatial2D=ImageField.analyzeSpatialLuminance(gray,W,H,bounds);
+
+    /* annotate sections with local stats */
+    sections.forEach(sec=>{
+      const slice=rows.slice(sec.start,sec.end+1);
+      const n=slice.length||1;
+      sec.avgLum=slice.reduce((s,r)=>s+r.luminance,0)/n;
+      sec.avgSat=slice.reduce((s,r)=>s+r.saturation,0)/n;
+      sec.avgEdge=slice.reduce((s,r)=>s+r.edgeDensity,0)/n;
+      sec.avgTexture=slice.reduce((s,r)=>s+r.textureGrain,0)/n;
+      /* dominant hue of section */
+      let shx=0,shy=0,shw=0;
+      slice.forEach(r=>{
+        const rad=r.hue*Math.PI/180;
+        const w=r.hueStrength*r.saturation;
+        shx+=Math.cos(rad)*w; shy+=Math.sin(rad)*w; shw+=w;
+      });
+      const sh=ImageField.hueStats(shx,shy,shw);
+      sec.hue=sh.deg;
+      sec.hueStr=sh.strength;
+    });
+
+    /* ── 8. Musical mapping ── */
+    const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+    /* root from hue: color wheel, red=0°=C, 30° per semitone */
+    const rootIdx=hue.strength>0.05?((Math.round(hue.deg/30)%12)+12)%12:0;
+    const rootConfidence=hue.strength;
+
+    /* mode from warmth × brightness × saturation × texture */
+    let mode, modeConfidence=0.7;
+    if(satMean<0.12){
+      /* near-monochrome: pentatonic */
+      mode=warmCoolRatio>0.5?'pentatonic_major':'pentatonic_minor';
+    } else if(warmCoolRatio>0.62){
+      /* warm: major family */
+      if(brMean>0.55) { mode='lydian'; modeConfidence=0.8; }
+      else if(textureComplexity>0.4) { mode='mixolydian'; }
+      else mode='major';
+    } else if(warmCoolRatio<0.38){
+      /* cool: minor family */
+      if(textureComplexity>0.5) { mode='phrygian'; modeConfidence=0.8; }
+      else if(satMean>0.4) { mode='harmonic_minor'; }
+      else mode='natural_minor';
+    } else {
+      /* mixed: modal */
+      if(edgeDensity>0.3) mode='dorian';
+      else if(brMean>0.5) mode='mixolydian';
+      else mode='aeolian';
+    }
+
+    /* tempo from texture × edges */
+    const tempoBase=60;
+    const tempoRange=100;
+    const tempoFactor=clamp(edgeDensity*0.6+textureComplexity*0.4,0,1);
+    const bpm=Math.round(tempoBase+tempoRange*tempoFactor);
+    let tempoFeel='andante';
+    if(bpm>140) tempoFeel='allegro';
+    else if(bpm>110) tempoFeel='moderato';
+    else if(bpm>80) tempoFeel='andante';
+    else tempoFeel='adagio';
+
+    /* rhythm complexity from edge distribution uniformity */
+    const edgeValues=rows.map(r=>r.edgeDensity);
+    let edgeMean2=edgeValues.reduce((s,v)=>s+v,0)/edgeValues.length;
+    let edgeVar=edgeValues.reduce((s,v)=>s+(v-edgeMean2)**2,0)/edgeValues.length;
+    const rhythmComplexity=clamp(Math.sqrt(edgeVar)*4,0,1);
+
+    /* dynamic range from brightness std */
+    const dynamicRange=clamp(brStd*3.5,0,1);
+
+    /* harmonic density from saturation + hue diversity */
+    const harmonicDensity=clamp(satMean*0.5+hue.diversity*0.5,0,1);
+
+    /* tension from contrast × saturation extremes */
+    const tension=clamp(brStd*2+satStd*2+edgeDensity*0.5,0,1);
+
+    /* overall energy */
+    const energy=clamp(brMean*0.3+edgeDensity*0.35+textureComplexity*0.2+satMean*0.15,0,1);
+
+    /* register distribution */
+    const registerLow=clamp(1-brMean-edgeDensity*0.3,0,1);
+    const registerHigh=clamp(brMean+edgeDensity*0.2,0,1);
+    const registerCenter=1-Math.abs(registerLow-registerHigh);
+
+    const elapsed=performance.now()-t0;
+
+    /* ── ASSEMBLE CONTEXT ── */
+    return {
+      /* metadata */
+      width:W, height:H,
+      contentBounds:bounds,
+      contentWidth:contentW, contentHeight:contentH,
+      analysisTime:elapsed,
+
+      /* brightness */
+      brightness:{
+        mean:brMean, stdDev:brStd,
+        histogram:histNorm, peakBin,
+        bimodality, brClass,
+        entropy:visualEntropy
+      },
+
+      /* color */
+      color:{
+        saturation:{mean:satMean, stdDev:satStd},
+        warmCoolRatio,
+        dominantHue:{deg:hue.deg, strength:hue.strength, name:NOTE_NAMES[rootIdx]},
+        hueDiversity:hue.diversity,
+        palette
+      },
+
+      /* texture & edges */
+      texture:{
+        edgeDensity,
+        edgeDirectionBias:edgeHBias, /* >0.5 = more horizontal, <0.5 = more vertical */
+        complexity:textureComplexity,
+      },
+
+      /* spatial */
+      spatial:{
+        weightCenter,
+        bimodality
+      },
+
+      /* musical mapping */
+      music:{
+        root:{pc:rootIdx, name:NOTE_NAMES[rootIdx], confidence:rootConfidence},
+        mode:{name:mode, confidence:modeConfidence},
+        tempo:{bpm, feel:tempoFeel},
+        rhythmComplexity,
+        dynamicRange,
+        harmonicDensity,
+        tension,
+        energy,
+        register:{low:registerLow, center:registerCenter, high:registerHigh}
+      },
+
+      /* per-slice data (for scanning) */
+      rows, cols,
+
+      /* detected sections */
+      sections,
+
+      /* 2D visual structure */
+      quadTree,
+      quadLeaves,
+      spatial2D
+    };
   }
-  h=Math.round(h*60);if(h<0)h+=360;
-  const s=max===0?0:d/max, v=max;
-  return {h,s,v};
-}
+};
+
+
+/* ═════════════ BACKWARD-COMPATIBLE WRAPPERS ═════════════ */
+
+function rgbToHsv(r,g,b){ return ImageField.rgbToHsv(r,g,b); }
 
 function analyzeImageFull(rgb, width, height) {
-  const gray = new Float32Array(width*height);
-  for (let i=0; i<gray.length; i++) { const j=i*4; gray[i]=0.299*rgb[j]+0.587*rgb[j+1]+0.114*rgb[j+2]; }
-  let sumH=0, cntH=0, sumV=0, cntV=0;
-  for (let y=0; y<height; y+=2) for (let x=0; x<width-1; x+=2) { sumH += Math.abs(gray[y*width+x+1]-gray[y*width+x]); cntH++; }
-  for (let y=0; y<height-1; y+=2) for (let x=0; x<width; x+=2) { sumV += Math.abs(gray[(y+1)*width+x]-gray[y*width+x]); cntV++; }
-  const eH = cntH ? (sumH/cntH)/255 : 0, eV = cntV ? (sumV/cntV)/255 : 0;
-  const edgeDensity = (eH + eV) / 2;   // both directions, like python (gx.mean()+gy.mean())/2
-  let sumL=0, sumSat=0; const hueBuckets=new Array(8).fill(0);
-  for (let y=0; y<height; y+=2) for (let x=0; x<width; x+=2) {
-    const i=(y*width+x)*4;
-    const r=rgb[i],g=rgb[i+1],b=rgb[i+2];
-    const {h,s} = rgbToHsv(r,g,b);
-    const lum = 0.299*r+0.587*g+0.114*b;
-    sumL += lum; sumSat += s;
-    if(s>=0.15){ const bucket = Math.floor(h/45)%8; hueBuckets[bucket]++; }
-  }
-  const samplePx = (width/2)*(height/2);
-  const brightness = sumL/(255*samplePx), saturation = sumSat/samplePx;
-  const warm = hueBuckets[0]+hueBuckets[1]+hueBuckets[2];
-  const cool = hueBuckets[4]+hueBuckets[5]+hueBuckets[6];
-  const warmCool = (warm+cool)>0?warm/(warm+cool):0.5;
-  const domHueBucket = hueBuckets.indexOf(Math.max(...hueBuckets));
-  const domHue = domHueBucket*45+22.5;
-  const hist = new Array(32).fill(0);
-  for (let y=0; y<height; y+=2) for (let x=0; x<width; x+=2) {
-    const lum = Math.floor((0.299*rgb[(y*width+x)*4]+0.587*rgb[(y*width+x)*4+1]+0.114*rgb[(y*width+x)*4+2])/255*31);
-    hist[lum]++;
-  }
-  let entropy=0; const totalHist=hist.reduce((a,b)=>a+b,0);
-  for(const v of hist){ if(v>0){const p=v/totalHist;entropy-=p*Math.log2(p);} }
-  const textureComplexity = entropy/Math.log2(32);
-  return { brightness, saturation, edge_density:edgeDensity, texture_complexity:textureComplexity, warm_cool_ratio:warmCool, dom_hue:domHue };
+  const result = ImageField.analyze({data:rgb}, width, height);
+  return {
+    brightness: result.brightness.mean,
+    saturation: result.color.saturation.mean,
+    edge_density: result.texture.edgeDensity,
+    texture_complexity: result.texture.complexity,
+    warm_cool_ratio: result.color.warmCoolRatio,
+    dom_hue: result.color.dominantHue.deg,
+    _v2: result
+  };
 }
 
-function pickRoot(ctx, offset) { return ((Math.round(ctx.dom_hue/30 + offset) % 12) + 12) % 12; }
+function analyzeStripLocal(rgb, gray, width, yStart, yEnd) {
+  const h = yEnd - yStart;
+  if (h <= 0) return { brightness:.5, saturation:.3, edge_density:.1, texture_complexity:.5, warm_cool_ratio:.5, dom_hue:0, hue_variance:0 };
+  const bounds = {x0:0, y0:yStart, x1:width-1, y1:yEnd-1};
+  const totalH = Math.ceil(gray.length / width);
+  let grayBuf = gray;
+  if(!(gray instanceof Float32Array)){
+    grayBuf = new Float32Array(width*totalH);
+    for(let i=0;i<grayBuf.length;i++){const j=i*4;grayBuf[i]=ImageField.lum(rgb[j],rgb[j+1],rgb[j+2]);}
+  }
+  const nSamples = Math.min(6, h);
+  let lumSum=0, satSum=0, edgeSum=0, texSum=0, cnt=0;
+  let hueVX=0, hueVY=0, hueW=0, prevHue=-1, hueVarSum=0, hueVarCnt=0;
+  let warmE=0, coolE=0;
+  for(let s=0; s<nSamples; s++){
+    const sy = yStart + Math.floor(s/(Math.max(1,nSamples-1)) * Math.max(0,h-1));
+    const row = ImageField.extractRow(rgb, grayBuf, width, totalH, sy, bounds);
+    lumSum += row.luminance;
+    satSum += row.saturation;
+    edgeSum += row.edgeDensity;
+    texSum += row.textureGrain;
+    if(row.hueStrength > 0.05){
+      const rad = row.hue * Math.PI/180;
+      const wt = row.hueStrength * row.saturation;
+      hueVX += Math.cos(rad)*wt;
+      hueVY += Math.sin(rad)*wt;
+      hueW += wt;
+      if(prevHue >= 0){
+        hueVarSum += Math.min(Math.abs(row.hue-prevHue), 360-Math.abs(row.hue-prevHue));
+        hueVarCnt++;
+      }
+      prevHue = row.hue;
+    }
+    const hue = row.hue;
+    if(row.saturation > 0.1){
+      if(hue < 60 || hue > 300) warmE += row.saturation;
+      else if(hue > 150 && hue < 270) coolE += row.saturation;
+    }
+    cnt++;
+  }
+  return {
+    brightness: lumSum/cnt,
+    saturation: satSum/cnt,
+    edge_density: edgeSum/cnt,
+    texture_complexity: texSum/cnt,
+    warm_cool_ratio: (warmE+coolE) > 0 ? warmE/(warmE+coolE) : 0.5,
+    dom_hue: ImageField.hueStats(hueVX, hueVY, hueW).deg,
+    hue_variance: hueVarCnt ? hueVarSum/hueVarCnt/180 : 0
+  };
+}
+
+/* How much did the mood shift between two strips? 0..1 */
+function moodShiftMag(prev, curr) {
+  if(!prev||!curr) return 0;
+  const dHue=Math.min(Math.abs(curr.dom_hue-prev.dom_hue),360-Math.abs(curr.dom_hue-prev.dom_hue))/180;
+  return Math.min(1,
+    Math.abs(curr.brightness-prev.brightness)*0.3+
+    Math.abs(curr.saturation-prev.saturation)*0.35+
+    Math.abs(curr.edge_density-prev.edge_density)*1.8+
+    Math.abs(curr.warm_cool_ratio-prev.warm_cool_ratio)*0.4+
+    dHue*0.55
+  );
+}
+
+/* Pick scale mode from a local strip context */
+function pickLocalMode(lctx, warmHi, warmLo, satLo) {
+  const warm=lctx.warm_cool_ratio, sat=lctx.saturation, tex=lctx.texture_complexity;
+  if(sat<satLo) return warm>=0.5?"penta_major":"penta_minor";
+  if(warm>=warmHi) return lctx.brightness>0.6?"lydian":"major";
+  if(warm<=warmLo) return tex>0.55?"phrygian":(sat>0.5?"japanese":"minor");
+  return "dorian";
+}
+
+/* Derive per-section rhythm params entirely from image strip data */
+function localRhythmParams(lctx, baseParams) {
+  const e=lctx.edge_density, b=lctx.brightness, s=lctx.saturation, t=lctx.texture_complexity;
+  const busyness=Math.min(1, e*1.6+t*0.4);                    // 0..1 overall energy
+  const noteLen =Math.max(0.08, 1.0-busyness*0.82);           // long legato → short staccato
+  const velScale=0.42+b*0.58;                                  // bright → louder
+  const restProb=Math.max(0,(0.22-e)*3.0)*(1-b*0.65);        // dark+calm → more silence
+  const strumFactor=0.12+busyness*2.1;                         // calm → slow strum / busy → fast
+  // Bass subdivision: slider sets base, busyness modulates it
+  // bassDiv=1 → dense bass everywhere, bassDiv=4 → very sparse
+  const busyMul=busyness<0.18?3:busyness<0.4?2:busyness<0.65?1:0.5;
+  const bassSubdiv=Math.max(1, Math.round(baseParams.bassDiv * busyMul));
+  // Lead flurry: notes per step
+  const flurry=Math.max(1, Math.round(baseParams.leadFlurry*(0.22+busyness*1.55)));
+  // Gate: dark sections silence more lead notes
+  const gate=Math.min(0.88, baseParams.gateDark+(1-b)*0.13);
+  // Chord size bonus for highly saturated sections
+  const chordSizeAdd=s>0.65?1:0;
+  return {busyness,noteLen,velScale,restProb,strumFactor,bassSubdiv,flurry,gate,chordSizeAdd};
+}
+
+/* Render section mood strip + log line below image canvas */
+function drawSectionViz(sections) {
+  const viz=$('sectionViz'), log=$('moodLog');
+  if(!sections||!sections.length){viz.style.display='none';if(log)log.textContent='';return;}
+  viz.style.display='flex'; viz.innerHTML='';
+  const parts=[];
+  sections.forEach(({lctx,lmode,lroot,lrhythm,shift},i)=>{
+    const hue=lctx.dom_hue;
+    const sat=Math.round(28+lctx.saturation*55);
+    const lit=Math.round(14+lctx.brightness*46);
+    const seg=document.createElement('div');
+    seg.style.cssText=`flex:1;position:relative;display:flex;align-items:center;justify-content:center;background:hsl(${hue},${sat}%,${lit}%);`;
+    seg.title=lmode==='chromatic' ? `§${i+1}: FREE | energy ${(lrhythm.busyness*100|0)}%` : `§${i+1}: ${NOTE_NAMES[lroot]} ${lmode} | energy ${(lrhythm.busyness*100|0)}%`;
+    const lbl=document.createElement('span');
+    lbl.style.cssText='font-size:7px;letter-spacing:.7px;color:rgba(255,255,255,.8);text-transform:uppercase;pointer-events:none;';
+    lbl.textContent=lmode==='chromatic' ? 'FREE' : lmode.replace('penta_','P·');
+    seg.appendChild(lbl);
+    if(shift>0.27){
+      const mk=document.createElement('div');
+      mk.style.cssText='position:absolute;left:0;top:0;bottom:0;width:2px;background:rgba(255,255,255,.6);';
+      seg.appendChild(mk);
+    }
+    viz.appendChild(seg);
+    const busy=lrhythm.busyness;
+    const rTag=busy<0.2?'sparse':busy<0.45?'calm':busy<0.7?'active':'dense';
+    const sTag=shift>0.45?' ⚡':shift>0.27?' ~':'';
+    parts.push(`§${i+1} ${NOTE_NAMES[lroot]}·${lmode.replace('penta_','p.')} [${rTag}]${sTag}`);
+  });
+  if(log) log.textContent=parts.join('  ·  ');
+}
+
+function pickRoot(ctx, offset) {
+  if(ctx._v2) return ((ctx._v2.music.root.pc + Math.round(offset)) % 12 + 12) % 12;
+  return ((Math.round(ctx.dom_hue/30 + offset) % 12) + 12) % 12;
+}
 function snapToScale(midi, rootPc, mode, lock) {
   if(!lock) return Math.round(midi);
   const pcs = MODES[mode].map(d=>(rootPc+d)%12);
@@ -862,111 +2015,745 @@ function bandRange(total,idx,count){const a=Math.floor(idx*total/count);const b=
 function bandStats(rgbBand,width){const rows=rgbBand.length/(width*4);let hueSum=0,satSum=0,valSum=0,count=0;for(let y=0;y<rows;y++)for(let x=0;x<width;x++){const i=(y*width+x)*4;const {h,s,v}=rgbToHsv(rgbBand[i],rgbBand[i+1],rgbBand[i+2]);hueSum+=h;satSum+=s;valSum+=v;count++;}return {hue:count?hueSum/count:0,sat:count?satSum/count:0,val:count?valSum/count:0};}
 function salientColumns(grayBand,width,k){if(width<2)return[0];const diff=new Float32Array(width-1);const h=grayBand.length/width;for(let x=0;x<width-1;x++){let sum=0;for(let y=0;y<h;y++)sum+=Math.abs(grayBand[y*width+x+1]-grayBand[y*width+x]);diff[x]=sum;}const colEdge=new Float32Array(width);for(let x=0;x<width-1;x++)colEdge[x]=diff[x];colEdge[width-1]=diff[width-2]||0;const cols=[];for(let z=0;z<k;z++){const a=Math.floor(z*width/k);const b=Math.max(a+1,Math.floor((z+1)*width/k));let bestCol=a,bestVal=colEdge[a];for(let i=a;i<b;i++){if(colEdge[i]>bestVal){bestVal=colEdge[i];bestCol=i;}}cols.push(bestCol);}return cols;}
 
+/* ── SOBEL EDGE ANALYSIS (bass reads structure, not color averages) ──────── */
+function sobelBand(gray, width, ya, yb) {
+  const bh = Math.max(2, yb - ya);
+  const mag  = new Float32Array(bh * width);
+  const angF = new Float32Array(bh * width);
+  const gxF  = new Float32Array(bh * width);
+
+  for (let y = 1; y < bh - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      const g = (r, c) => gray[(ya + r) * width + c];
+      const gx = -g(y-1,x-1) + g(y-1,x+1)
+               - 2*g(y,x-1)  + 2*g(y,x+1)
+               - g(y+1,x-1)  + g(y+1,x+1);
+      const gy = -g(y-1,x-1) - 2*g(y-1,x) - g(y-1,x+1)
+               + g(y+1,x-1)  + 2*g(y+1,x) + g(y+1,x+1);
+      const m = Math.sqrt(gx * gx + gy * gy) / (4 * 255); // normalize 0..1
+      const a = (Math.atan2(gy, gx) * 180 / Math.PI + 360) % 360; // 0..360
+      const idx = y * width + x;
+      mag[idx]  = m;
+      angF[idx] = a;
+      gxF[idx]  = gx;
+    }
+  }
+
+  // Column-wise edge profile: sum magnitude per column → find peaks
+  const colMag = new Float32Array(width);
+  for (let x = 0; x < width; x++) {
+    let sum = 0;
+    for (let y = 1; y < bh - 1; y++) sum += mag[y * width + x];
+    colMag[x] = sum / Math.max(1, bh - 2);
+  }
+
+  // Find top-K edge peaks (columns with strongest edges)
+  const findPeaks = (k) => {
+    const indices = [];
+    for (let x = 1; x < width - 1; x++) {
+      if (colMag[x] > colMag[x-1] && colMag[x] >= colMag[x+1] && colMag[x] > 0.01) {
+        indices.push({ x, mag: colMag[x] });
+      }
+    }
+    indices.sort((a, b) => b.mag - a.mag);
+    return indices.slice(0, k);
+  };
+
+  // Average angle at a specific column (magnitude-weighted)
+  const angleAtCol = (col) => {
+    let sinSum = 0, cosSum = 0, wSum = 0;
+    for (let y = 1; y < bh - 1; y++) {
+      const idx = y * width + col;
+      const w = mag[idx];
+      const rad = angF[idx] * Math.PI / 180;
+      sinSum += w * Math.sin(rad);
+      cosSum += w * Math.cos(rad);
+      wSum += w;
+    }
+    if (wSum < 0.001) return 0;
+    return ((Math.atan2(sinSum / wSum, cosSum / wSum) * 180 / Math.PI) + 360) % 360;
+  };
+
+  // Gradient direction bias: are horizontal edges trending up or down?
+  const gxBias = () => {
+    let sum = 0, cnt = 0;
+    for (let y = 1; y < bh - 1; y++) {
+      for (let x = 1; x < width - 1; x++) {
+        if (mag[y * width + x] > 0.03) { sum += gxF[y * width + x]; cnt++; }
+      }
+    }
+    return cnt > 0 ? sum / cnt : 0; // positive = edges trend right, negative = left
+  };
+
+  // Overall edge density for this band
+  let totalMag = 0, magCnt = 0;
+  for (let y = 1; y < bh - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      totalMag += mag[y * width + x]; magCnt++;
+    }
+  }
+  const density = magCnt > 0 ? totalMag / magCnt : 0;
+
+  // Magnitude variance → rhythmic complexity
+  let varSum = 0;
+  for (let y = 1; y < bh - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      const d = mag[y * width + x] - density;
+      varSum += d * d;
+    }
+  }
+  const magVariance = magCnt > 0 ? Math.sqrt(varSum / magCnt) : 0;
+
+  return { mag, angF, colMag, findPeaks, angleAtCol, gxBias, density, magVariance };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PRE-ANALYSIS: runs before any voice, returns a shared SCORE object that
+   all voices read from.  Nothing here plays anything — it just describes
+   the piece so all instruments can agree on structure, motifs, and dynamics.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+function analyzeScore(gray, rgb, width, height, globalCtx, rootPc, mode, params) {
+  const { steps, chordSections, warmHi, warmLo, satLo } = params;
+
+  /* ── 1. PER-STEP FINGERPRINTS ────────────────────────────────────────── */
+  const fingerprints = [];
+  for (let s = 0; s < steps; s++) {
+    const [ya, yb] = bandRange(height, s, steps);
+    const bh = Math.max(1, yb - ya);
+    let lumSum=0, satSum=0, hueSum=0, edgeSum=0, edgeCnt=0, warmCnt=0, coolCnt=0, pixCnt=0;
+    for (let y = ya; y < yb; y++) {
+      for (let x = 0; x < width; x++) {
+        const ri = (y*width+x)*4;
+        const {h, s:sv, v} = rgbToHsv(rgb[ri], rgb[ri+1], rgb[ri+2]);
+        lumSum+=v; satSum+=sv; hueSum+=h; pixCnt++;
+        if (sv >= 0.12) { if (h<135||h>315) warmCnt++; else coolCnt++; }
+      }
+      for (let x=0; x<width-1; x++) { edgeSum+=Math.abs(gray[y*width+x+1]-gray[y*width+x]); edgeCnt++; }
+    }
+    const br   = pixCnt ? lumSum/pixCnt : 0.5;
+    const sat  = pixCnt ? satSum/pixCnt : 0.3;
+    const hueN = pixCnt ? (hueSum/pixCnt)/360 : 0;
+    const edge = edgeCnt ? (edgeSum/edgeCnt)/255 : 0;
+    const warm = (warmCnt+coolCnt)>0 ? warmCnt/(warmCnt+coolCnt) : 0.5;
+    fingerprints.push([br, sat, hueN, edge, warm]);
+  }
+
+  /* ── 2. MOTIF DETECTION: recurring visual fingerprints = musical themes ── */
+  const FP_THRESH = 0.18;
+  const motifOf  = new Array(steps).fill(-1);
+  const motifs   = [];
+  const fpDist = (a, b) => {
+    const w = [1.4, 0.8, 1.8, 0.6, 0.7];
+    let d = 0; for (let i=0;i<5;i++) d += w[i]*(a[i]-b[i])**2;
+    return Math.sqrt(d);
+  };
+
+  for (let s = 0; s < steps; s++) {
+    let bestMotif=-1, bestDist=FP_THRESH;
+    for (let m=0; m<motifs.length; m++) {
+      const d = fpDist(fingerprints[s], motifs[m].centerFp);
+      if (d < bestDist) { bestDist=d; bestMotif=m; }
+    }
+    if (bestMotif >= 0) {
+      motifOf[s] = bestMotif;
+      const mf = motifs[bestMotif]; mf.count++;
+      for (let i=0;i<5;i++) mf.centerFp[i] += (fingerprints[s][i]-mf.centerFp[i])/mf.count;
+    } else {
+      const [ya, yb] = bandRange(height, s, steps);
+      const bh = Math.max(1, yb-ya);
+      const lctxS = analyzeStripLocal(rgb, gray, width, ya, yb);
+      const mRoot = params.freeRead ? 0 : pickRoot(lctxS, params.rootHueOffset);
+      const mMode = params.freeRead ? 'chromatic' : pickLocalMode(lctxS, warmHi, warmLo, satLo);
+      const mDegs = MODES[mMode];
+      const mPcs  = mDegs.map(d => (mRoot+d)%12);
+      const gBand = gray.slice(ya*width, yb*width);
+      const nCols = Math.min(3, Math.max(2, mDegs.length));
+      const motifCols = salientColumns(gBand, width, nCols);
+      const pitchCell = motifCols.map(col => {
+        let rr=0,gg=0,bb=0;
+        for (let y=0;y<bh;y++) {
+          const j=(ya+y)*width*4+col*4;
+          rr+=rgb[j]||0; gg+=rgb[j+1]||0; bb+=rgb[j+2]||0;
+        }
+        rr/=bh; gg/=bh; bb/=bh;
+        const {h:hue} = rgbToHsv(rr,gg,bb);
+        // freeRead: hue straight to chromatic PC; normal: through scale filter
+        return params.freeRead ? Math.round(hue/30)%12 : mPcs[Math.round(hue/360*mPcs.length)%mPcs.length];
+      });
+      motifOf[s] = motifs.length;
+      motifs.push({ centerFp:[...fingerprints[s]], count:1, pitchCell, firstStep:s, mRoot, mMode });
+    }
+  }
+
+  /* ── 3. STRUCTURAL ARC: intro → build → peak → release → outro ──────── */
+  const energy = fingerprints.map(fp => fp[0]*0.4 + fp[1]*0.3 + fp[3]*0.7 + (1-Math.abs(fp[4]-0.5)*2)*0.1);
+  const smoothE = energy.map((v,i,a) => {
+    const w=3; let sum=0,cnt=0;
+    for(let j=Math.max(0,i-w);j<=Math.min(a.length-1,i+w);j++){sum+=a[j];cnt++;}
+    return sum/cnt;
+  });
+  const peakStep = smoothE.indexOf(Math.max(...smoothE));
+  const arcPhase = steps>1 ? smoothE.map((e,i) => {
+    const pos=i/(steps-1), peakPos=peakStep/(steps-1);
+    if (pos < peakPos*0.25)            return 0; // intro
+    if (pos < peakPos*0.75)            return 1; // build
+    if (Math.abs(pos-peakPos) < 0.15)  return 2; // peak
+    if (pos < peakPos+(1-peakPos)*0.6) return 3; // release
+    return 4;                                     // outro
+  }) : new Array(steps).fill(2);
+
+  /* ── 4. SHARED DYNAMICS ENVELOPE (all voices scale by this) ─────────── */
+  const dynEnvelope = smoothE.map((e,i) => {
+    const phaseScale = [0.45, 0.70, 1.0, 0.72, 0.40][arcPhase[i]];
+    return 0.25 + e*phaseScale*0.75;
+  });
+
+  /* ── 5. SILENCE MAP ─────────────────────────────────────────────────── */
+  const silenceMap = fingerprints.map(fp => fp[0]<0.07 && fp[3]<0.04);
+
+  /* ── 6. TEXTURE ROLE: who plays what role each step ─────────────────── */
+  // Voices read this and yield to each other — bass heavy in dark sections,
+  // pad carries dreamy sections, lead rests on intro/outro unless motif returns
+  // Texture role: determines who takes the spotlight each step.
+  // Softened from original — voices still yield to each other but less extremely.
+  // 'full' = everyone plays freely, 'bass_focus'/'pad_focus' = one voice louder
+  // but the other still plays (not root-locked). 'sparse' = intro/outro breath.
+  const textureRole = fingerprints.map((fp,i) => {
+    if (silenceMap[i]) return 'silence';
+    const phase=arcPhase[i], e=fp[3], sat=fp[1], br=fp[0];
+    if (phase===0||phase===4) return e<0.06?'sparse':'full';
+    if (sat>0.45&&e>0.08)     return 'full';
+    if (br<0.20&&e>0.04)      return 'bass_lead';
+    if (e<0.03&&sat<0.3)      return 'pad_lead';
+    return 'full';
+  });
+
+  return { fingerprints, motifOf, motifs, arcPhase, dynEnvelope, silenceMap, textureRole, smoothE, peakStep };
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
 function buildVoices(gray, rgb, width, height, ctx, rootPc, mode, params) {
-  const { steps, chordSections, leadFlurry, gateDark, leadStab, chordStrum, bassDiv, velMin, velMax,
-          percTexGate, percEdgeGate, usePad, useBass, useLead, usePerc,
-          padLo, padHi, bassLo, bassHi, leadLo, leadHi } = params;
-  const events = { lead:[], pad:[], bass:[], perc:[] };
-  const sectionChord = [];
+  /*
+   * IMAGE-FIRST TWO-VOICE ENGINE
+   *
+   * There is deliberately no percussion voice here.  Visual attacks are
+   * extracted once and then allocated between bass and lead.  The allocation
+   * is allowed to change from step to step because the image itself changes.
+   *
+   * Bass  = structure, weight, strong attacks, harmonic floor.
+   * Lead  = colour, fine detail, melodic motion, bright/complex attacks.
+   * Pad   = optional harmonic atmosphere; it does not compete for events.
+   *
+   * The musical rules are constraints around the image rather than a second
+   * composition laid over it.  A little wandering is intentional: the lead
+   * may leave the immediately obvious pitch and return, while exact-note
+   * repetition is prevented from becoming an accidental drone.
+   */
+  const {
+    steps, chordSections, leadStab, chordStrum, bassDiv, velMin, velMax,
+    percTexGate, percEdgeGate, usePad, useBass, useLead,
+    padLo, padHi, bassLo, bassHi, leadLo, leadHi, warmHi, warmLo, satLo
+  } = params;
+
+  const events = { lead: [], pad: [], bass: [], perc: [] };
+  const clampVel = v => Math.max(60, Math.min(100, Math.floor(v)));
+  const sh = (seed, offset=0) => {
+    const x = Math.sin(seed * 127.1 + offset * 311.7) * 43758.5453;
+    return x - Math.floor(x);
+  };
+  const clamp01 = v => Math.max(0, Math.min(1, v));
+  const lerp = (a,b,t) => a + (b-a)*t;
+
+  const score = analyzeScore(gray, rgb, width, height, ctx, rootPc, mode, params);
+  buildVoices._score = score;
+
+  /* ── SECTION DATA ─────────────────────────────────────────────────────── */
+  const sectionData = [];
   for (let sec=0; sec<chordSections; sec++) {
-    const [a,b] = bandRange(height, sec, chordSections);
-    const bandRgb = rgb.slice(a*width*4, b*width*4);
+    const [ya,yb] = bandRange(height, sec, chordSections);
+    const lctx = analyzeStripLocal(rgb, gray, width, ya, yb);
+    const lmode = params.freeRead ? 'chromatic' : pickLocalMode(lctx, warmHi, warmLo, satLo);
+    const lroot = params.freeRead ? 0 : pickRoot(lctx, params.rootHueOffset);
+    const lrhythm = localRhythmParams(lctx, params);
+    const shift = sec>0 ? moodShiftMag(sectionData[sec-1].lctx, lctx) : 0;
+    const bandRgb = rgb.slice(ya*width*4, yb*width*4);
     const st = bandStats(bandRgb, width);
-    const degree = Math.floor(st.hue / 360 * MODES[mode].length) % MODES[mode].length;
-    const size = chordSize(st.sat);
-    const chord = diatonicChord(rootPc, mode, degree, size);
-    sectionChord.push({chord, st, a, b});
+    let chord;
+
+    if (params.freeRead) {
+      const pcHist = new Float32Array(12);
+      const bh = Math.max(1, yb-ya);
+      for (let y=0; y<bh; y++) {
+        for (let x=0; x<width; x++) {
+          const j=(y*width+x)*4;
+          const {h,s:sat} = rgbToHsv(bandRgb[j],bandRgb[j+1],bandRgb[j+2]);
+          if (sat>0.08) pcHist[Math.round(h/30)%12] += sat;
+        }
+      }
+      const maxBin=Math.max(0.001,...pcHist);
+      const pcs=[];
+      for(let pc=0;pc<12;pc++) if(pcHist[pc]>maxBin*0.08) pcs.push(pc);
+      pcs.sort((a,b)=>pcHist[b]-pcHist[a]);
+      chord=pcs.slice(0,Math.max(2,Math.min(6,pcs.length)));
+    } else {
+      const degree=Math.floor(st.hue/360*MODES[lmode].length)%MODES[lmode].length;
+      const size=Math.min(6,chordSize(st.sat)+lrhythm.chordSizeAdd);
+      chord=diatonicChord(lroot,lmode,degree,size);
+    }
+    sectionData.push({lctx,lmode,lroot,lrhythm,st,chord,shift});
   }
+  buildVoices._sections = sectionData;
+  const stepToSec = s => Math.min(chordSections-1, Math.floor(s*chordSections/steps));
+
+  /* ── PAD ──────────────────────────────────────────────────────────────── */
   if (usePad) {
-    for (let sec=0; sec<chordSections; sec++) {
-      const {chord, st} = sectionChord[sec];
-      const s0 = sec * steps / chordSections;
-      const s1 = (sec+1) * steps / chordSections;
-      const pv = Math.floor(velMin + (velMax-velMin) * 0.45 * (0.4+st.val));
-      for (let j=0; j<chord.length; j++) {
-        const note = placePc(chord[j]%12, padLo+6, padLo, padHi);
-        events.pad.push({time: s0+j*chordStrum, type:'on', midi:note, vel:Math.max(8,pv), channel:3});
-        events.pad.push({time: s1, type:'off', midi:note, vel:0, channel:3});
+    for(let sec=0;sec<chordSections;sec++) {
+      const {chord,st,lrhythm}=sectionData[sec];
+      const s0=Math.floor(sec*steps/chordSections);
+      const s1=Math.floor((sec+1)*steps/chordSections);
+      const mid=Math.floor((s0+s1)/2);
+      const role=score.textureRole[Math.min(mid,steps-1)];
+      const dyn=score.dynEnvelope[Math.min(mid,steps-1)];
+      const phase=score.arcPhase[Math.min(mid,steps-1)];
+      if(role==='silence') continue;
+
+      const reduced=role==='bass_lead';
+      const localStrum=chordStrum*Math.max(0.12,lrhythm.strumFactor);
+      const baseVel=(velMin+(velMax-velMin)*lrhythm.velScale*(0.35+0.65*st.val));
+      const pv=clampVel(baseVel*dyn*(reduced?0.42:0.78));
+      const voiceCount=reduced?1:(phase<=1||phase>=3)?Math.min(3,chord.length):chord.length;
+      const holdFrac=reduced?0.96:Math.max(0.72,lrhythm.noteLen);
+
+      for(let j=0;j<voiceCount;j++) {
+        const target=padLo+st.val*(padHi-padLo)*0.78+j*2;
+        const note=placePc(chord[j]%12,target,padLo,padHi);
+        const onT=s0+j*localStrum;
+        const offT=Math.max(onT+0.05,s0+(s1-s0)*holdFrac);
+        events.pad.push({time:onT,type:'on',midi:note,vel:pv,channel:3});
+        events.pad.push({time:offT,type:'off',midi:note,vel:0,channel:3});
       }
     }
   }
-  if (useBass) {
-    const div = Math.max(1, Math.round(bassDiv / (0.5 + ctx.edge_density*3)));
-    for (let s=0; s<steps; s+=div) {
-      const sec = Math.min(chordSections-1, Math.floor(s*chordSections/steps));
-      const {chord} = sectionChord[sec];
-      const rootNote = placePc(chord[0]%12, bassLo+6, bassLo, bassHi);
-      const [a,b] = bandRange(height, s, steps);
-      const bandGray = gray.slice(a*width, b*width);
-      const bright = bandGray.reduce((s,v)=>s+v,0)/bandGray.length/255;
-      const vel = Math.floor(velMin + (velMax-velMin)*(0.3+0.7*bright));
-      events.bass.push({time:s, type:'on', midi:rootNote, vel, channel:1});
-      events.bass.push({time:s+div*0.9, type:'off', midi:rootNote, vel:0, channel:1});
+
+  /* ── SHARED VISUAL EVENT FIELD ─────────────────────────────────────────
+   * One analysis pass supplies both voices.  This is the key architectural
+   * change: bass and lead no longer independently compete for the same image.
+   */
+  const visual = new Array(steps);
+  for(let s=0;s<steps;s++) {
+    const sec=stepToSec(s);
+    const {lroot,lmode,lrhythm}=sectionData[sec];
+    const [ya,yb]=bandRange(height,s,steps);
+    const bh=Math.max(2,yb-ya);
+    const gband=gray.slice(ya*width,yb*width);
+    const rband=rgb.slice(ya*width*4,yb*width*4);
+    const sobel=sobelBand(gray,width,ya,yb);
+    const role=score.textureRole[s];
+    const dyn=score.dynEnvelope[s];
+    const fp=score.fingerprints[s];
+    const bright=fp[0], sat=fp[1], edge=fp[3];
+
+    /* Local colour change, not just average hue. */
+    let hueSin=0,hueCos=0,satSum=0,valSum=0,count=0;
+    for(let y=0;y<bh;y++) {
+      for(let x=0;x<width;x++) {
+        const j=(y*width+x)*4;
+        const hsv=rgbToHsv(rband[j],rband[j+1],rband[j+2]);
+        const rad=hsv.h*Math.PI/180;
+        hueSin+=Math.sin(rad)*hsv.s;
+        hueCos+=Math.cos(rad)*hsv.s;
+        satSum+=hsv.s; valSum+=hsv.v; count++;
+      }
     }
+    const meanHue=((Math.atan2(hueSin,hueCos)*180/Math.PI)+360)%360;
+    const meanSat=count?satSum/count:0;
+    const meanVal=count?valSum/count:0.5;
+
+    /* Strong horizontal contrast is the actual transient source. */
+    let maxJump=0, jumpSum=0, jumpCnt=0;
+    for(let y=0;y<bh;y++) {
+      for(let x=0;x<width-1;x++) {
+        const d=Math.abs(gband[y*width+x+1]-gband[y*width+x])/255;
+        jumpSum+=d; jumpCnt++; if(d>maxJump) maxJump=d;
+      }
+    }
+    const localContrast=jumpCnt?jumpSum/jumpCnt:0;
+    const structure=clamp01(sobel.density*5.0 + sobel.magVariance*3.0 + maxJump*0.35);
+    const fineDetail=clamp01(edge*2.7 + sobel.magVariance*5.0 + meanSat*0.25);
+    const eventEnergy=clamp01(structure*0.58 + fineDetail*0.42 + dyn*0.18);
+
+    /* Candidate columns are the image's actual interesting locations. */
+    const maxCandidates=Math.max(3,Math.min(7,2+Math.round(lrhythm.flurry/4)));
+    const candidates=[];
+    const peaks=sobel.findPeaks(maxCandidates);
+    for(const p of peaks) {
+      const col=Math.max(1,Math.min(width-2,p.x));
+      const angle=sobel.angleAtCol(col);
+      let rr=0,gg=0,bb=0;
+      for(let y=0;y<bh;y++) {
+        const j=(y*width+col)*4;
+        rr+=rband[j];gg+=rband[j+1];bb+=rband[j+2];
+      }
+      rr/=bh;gg/=bh;bb/=bh;
+      const hsv=rgbToHsv(rr,gg,bb);
+      const strength=clamp01(p.mag*7 + sobel.density*2 + hsv.s*0.22);
+      candidates.push({x:col,normX:col/Math.max(1,width-1),mag:p.mag,strength,angle,hue:hsv.h,sat:hsv.s,val:hsv.v});
+    }
+
+    /* If Sobel is sparse, colour salience still gets to create melodic
+       material. This keeps bright/simple images from becoming silent. */
+    if(candidates.length<2 && meanSat>0.08) {
+      const cols=salientColumns(gband,width,Math.min(3,maxCandidates));
+      for(const col0 of cols) {
+        const col=Math.max(0,Math.min(width-1,col0));
+        let rr=0,gg=0,bb=0;
+        for(let y=0;y<bh;y++){const j=(y*width+col)*4;rr+=rband[j];gg+=rband[j+1];bb+=rband[j+2];}
+        rr/=bh;gg/=bh;bb/=bh;
+        const hsv=rgbToHsv(rr,gg,bb);
+        candidates.push({x:col,normX:col/Math.max(1,width-1),mag:localContrast,strength:clamp01(meanSat+localContrast*2),angle:0,hue:hsv.h,sat:hsv.s,val:hsv.v});
+      }
+    }
+
+    candidates.sort((a,b)=>b.strength-a.strength);
+    const roleBass = role==='bass_lead' ? 0.68 : role==='pad_lead' ? 0.34 : 0.50;
+    const roleLead = 1-roleBass;
+    const ownership=candidates.map((e,i)=>{
+      const heavy=clamp01(e.strength*0.72 + structure*0.45 + (1-e.val)*0.10);
+      const brightFine=clamp01(e.sat*0.55 + e.val*0.20 + fineDetail*0.48);
+      let bassScore=heavy*0.72 + roleBass*0.28;
+      let leadScore=brightFine*0.72 + roleLead*0.28;
+      /* Position within the visual band matters: left/right is phrase time
+         source, while local edge character decides who gets the event. */
+      if(e.normX<0.22 || e.normX>0.78) bassScore+=0.04;
+      if(e.normX>0.25 && e.normX<0.75) leadScore+=0.05;
+      if(i===0 && eventEnergy>0.62) bassScore+=0.12;
+      const total=Math.max(0.001,bassScore+leadScore);
+      return {...e,bassAffinity:bassScore/total,leadAffinity:leadScore/total};
+    });
+
+    /* Event count is image-derived first, slider-limited second. */
+    const densityGate=clamp01((percEdgeGate-0.02)*3.0);
+    const available=ownership.filter(e=>e.strength>densityGate*0.22);
+    const maxEvents=Math.max(1,Math.min(7,1+Math.round(eventEnergy*(1+lrhythm.busyness*3))));
+    const chosen=available.slice(0,maxEvents);
+
+    visual[s]={ya,yb,bh,gband,rband,sobel,bright,sat,edge,meanHue,meanSat,meanVal,structure,fineDetail,eventEnergy,dyn,role,lroot,lmode,lrhythm,events:chosen};
   }
-  if (useLead) {
-    for (let s=0; s<steps; s++) {
-      const [a,b] = bandRange(height, s, steps);
-      const gband = gray.slice(a*width, b*width);
-      const rband = rgb.slice(a*width*4, b*width*4);
-      const h = b-a;
-      const bright = gband.reduce((s,v)=>s+v,0)/gband.length/255;
-      if (bright < gateDark) continue;
-      let edgeSum=0, edgeCnt=0;
-      for (let y=0; y<h; y++) for (let x=0; x<width-1; x++) { edgeSum += Math.abs(gband[y*width+x+1]-gband[y*width+x]); edgeCnt++; }
-      const edge = edgeCnt ? (edgeSum/edgeCnt)/255 : 0;
-      const k = 1 + Math.round(Math.min(1, edge*3) * leadFlurry);
-      const cols = salientColumns(gband, width, k);
-      for (let i=0; i<cols.length; i++) {
-        const col = cols[i];
-        // sample the whole column across the band (matches python's rband[:,col,:])
-        let rr=0, gg=0, bb=0;
-        for (let y=0; y<h; y++) { const j=(y*width+col)*4; rr+=rband[j]; gg+=rband[j+1]; bb+=rband[j+2]; }
-        rr/=h; gg/=h; bb/=h;
-        const {h:hue, s:sat, v:val} = rgbToHsv(rr, gg, bb);  // renamed so it can't clobber the step counter s
-        const pc = (rootPc + Math.round(hue/30)) % 12;
-        const target = leadLo + val*(leadHi-leadLo);
-        let note = placePc(pc, target, leadLo, leadHi);
-        note = snapToScale(note, rootPc, mode, params.scaleLock);
-        note = foldInto(note, leadLo, leadHi);
-        const vel = Math.floor(velMin + (velMax-velMin)*(0.2+0.8*sat));  // saturation-driven, like python
-        const onTime = s + i/k;      // s is the STEP index again -> notes spread across the whole piece
-        const offTime = s + (i+leadStab)/k;
-        events.lead.push({time:onTime, type:'on', midi:note, vel:Math.max(8,Math.min(127,vel)), channel:2});
-        events.lead.push({time:offTime, type:'off', midi:note, vel:0, channel:2});
+
+  /* Smooth ownership across neighboring steps.  The image can change the
+     balance quickly, but not so abruptly that the voices sound like a switch. */
+  let previousBalance=0.5;
+  for(let s=0;s<steps;s++) {
+    const v=visual[s];
+    if(!v.events.length) { v.balance=previousBalance; continue; }
+    let sum=0;
+    for(const e of v.events) sum+=e.bassAffinity;
+    const raw=sum/v.events.length;
+    const imageMomentum=clamp01(v.structure*0.65+v.fineDetail*0.35);
+    const smoothing=0.25+imageMomentum*0.30;
+    const balance=lerp(previousBalance,raw,smoothing);
+    v.balance=balance;
+    previousBalance=balance;
+  }
+
+  /* ── BASS ─────────────────────────────────────────────────────────────── */
+  const bassAnchor=new Int16Array(steps); bassAnchor.fill(-1);
+  const bassStructure=new Float32Array(steps);
+  const bassDirection=new Int8Array(steps); bassDirection.fill(1);
+
+  if(useBass) {
+    let lastBass=-1, contourDir=1, contourLen=0;
+    for(let s=0;s<steps;s++) {
+      const v=visual[s];
+      if(v.role==='silence') continue;
+      const {chord,lroot,lmode,lrhythm}=sectionData[stepToSec(s)];
+      const scalePcs=MODES[lmode].map(d=>(lroot+d)%12);
+      const chordPcs=chord.map(pc=>pc%12);
+      const bassShare=v.balance;
+      bassStructure[s]=clamp01(v.structure*0.7+v.eventEnergy*0.3);
+
+      if(v.sobel.density<0.003 && v.events.length===0) continue;
+      const dirBias=v.sobel.gxBias();
+      if(Math.abs(dirBias)>12) contourDir=dirBias>0?1:-1;
+      contourLen++;
+      if(contourLen>3+Math.floor(sh(s,44)*3) && v.eventEnergy<0.55) { contourDir=-contourDir; contourLen=0; }
+      bassDirection[s]=contourDir;
+
+      const candidates=v.events.filter(e=>e.bassAffinity >= 0.42);
+      if(!candidates.length) continue;
+      const countCap=Math.max(1,Math.min(3,Math.round(1+v.structure*2+v.balance*0.8)));
+      const chosen=candidates.slice(0,countCap);
+      const noteDur=Math.max(0.28,lrhythm.noteLen*(0.62+0.55*(1-v.fineDetail)));
+      const used=[];
+
+      for(let i=0;i<chosen.length;i++) {
+        const e=chosen[i];
+        let pc;
+        if(params.freeRead) pc=Math.round(e.angle/30)%12;
+        else {
+          const deg=Math.round((e.angle/360)*scalePcs.length)%scalePcs.length;
+          pc=(v.eventEnergy>0.62 && chordPcs.length) ? chordPcs[deg%chordPcs.length] : scalePcs[deg];
+        }
+
+        let target;
+        if(lastBass>=0) {
+          const wander=(1-v.balance)*2.5 + v.eventEnergy*4;
+          target=lastBass + contourDir*(2+wander);
+          if(e.strength>0.75) target+=contourDir*3;
+        } else target=lerp(bassLo,bassHi,clamp01(v.bright*0.45+v.structure*0.55));
+        target=Math.max(bassLo+2,Math.min(bassHi-2,target));
+
+        let note=placePc(pc,target,bassLo,bassHi);
+        if(!params.freeRead) note=snapToScale(note,lroot,lmode,params.scaleLock);
+        note=foldInto(note,bassLo,bassHi);
+
+        if(used.includes(note)) {
+          const alt=(pc+contourDir+12)%12;
+          let n2=placePc(alt,target+contourDir*3,bassLo,bassHi);
+          if(!params.freeRead) n2=snapToScale(n2,lroot,lmode,params.scaleLock);
+          n2=foldInto(n2,bassLo,bassHi);
+          if(!used.includes(n2)) note=n2;
+        }
+
+        /* bassDiv is a real density control, but image activity can override
+           it upward when the picture clearly contains a structural event. */
+        const div=Math.max(1,bassDiv);
+        const baseOffset=(e.normX*0.38 + i*0.08) * Math.min(1,1/div);
+        const onT=s+baseOffset;
+        const hold=Math.max(0.22,div>4?noteDur*1.25:noteDur);
+        const offT=Math.min(s+Math.max(0.35,hold),s+Math.max(0.45,lrhythm.noteLen*1.5));
+        const vel=clampVel((velMin+(velMax-velMin)*(0.30+0.62*e.strength))*lrhythm.velScale*v.dyn*(0.78+0.35*bassShare));
+        events.bass.push({time:onT,type:'on',midi:note,vel,channel:1});
+        events.bass.push({time:offT,type:'off',midi:note,vel:0,channel:1});
+        used.push(note); lastBass=note; bassAnchor[s]=note;
+      }
+
+      /* A structural event between two bass notes can become a short passing
+         tone, but only when the image actually contains fine variation. */
+      if(chosen.length && v.fineDetail>0.42 && lastBass>=0 && sh(s,22)<v.fineDetail*0.72) {
+        const dir=contourDir;
+        let pass=lastBass+dir*(params.freeRead?2:1);
+        pass=foldInto(pass,bassLo,bassHi);
+        if(!params.freeRead) pass=snapToScale(pass,lroot,lmode,params.scaleLock);
+        const t=s+0.72;
+        events.bass.push({time:t,type:'on',midi:pass,vel:clampVel(velMin+(velMax-velMin)*0.38*v.dyn),channel:1});
+        events.bass.push({time:t+0.16,type:'off',midi:pass,vel:0,channel:1});
       }
     }
   }
-  if (usePerc && ctx.texture_complexity > percTexGate) {
-    let prev = 0;
-    for (let s=0; s<steps; s++) {
-      const [a,b] = bandRange(height, s, steps);
-      const gband = gray.slice(a*width, b*width);
-      const h = b-a;
-      let edgeSum=0, edgeCnt=0;
-      for (let y=0; y<h; y++) for (let x=0; x<width-1; x++) { edgeSum += Math.abs(gband[y*width+x+1]-gband[y*width+x]); edgeCnt++; }
-      const edge = edgeCnt ? (edgeSum/edgeCnt)/255 : 0;
-      if (edge - prev > percEdgeGate) {
-        events.perc.push({time:s, type:'on', midi:38, vel:96, channel:9});
-        events.perc.push({time:s+0.5, type:'off', midi:38, vel:0, channel:9});
+
+  /* ── LEAD ─────────────────────────────────────────────────────────────── */
+  if(useLead) {
+    let lastNote=-1,lastPc=-1,dir=1,phraseLen=0;
+    const recent=[];
+    let phraseSeed=0;
+
+    for(let s=0;s<steps;s++) {
+      const v=visual[s];
+      if(v.role==='silence') continue;
+      const {lroot,lmode,lrhythm,chord}=sectionData[stepToSec(s)];
+      const scaleDegs=MODES[lmode];
+      const scalePcs=scaleDegs.map(d=>(lroot+d)%12);
+      const leadShare=1-v.balance;
+      const candidates=v.events.filter(e=>e.leadAffinity>=0.38);
+      if(!candidates.length) continue;
+
+      /* Lead density is image-driven. LEAD FLURRY acts as the ceiling and
+         therefore remains useful without manufacturing notes from nothing. */
+      const naturalCount=1+Math.round(v.fineDetail*2.2+v.meanSat*0.8+leadShare*0.7);
+      const k=Math.max(1,Math.min(4,Math.min(lrhythm.flurry,naturalCount)));
+      const chosen=candidates.slice(0,k);
+      const bassPull=bassAnchor[s];
+
+      /* Image slope changes direction. Strong visual change can trigger an
+         angular move; otherwise movement stays mostly stepwise. */
+      const next=s+1<steps?visual[s+1]:null;
+      const brightDelta=next?next.bright-v.bright:0;
+      if(Math.abs(brightDelta)>0.035) { dir=brightDelta>0?1:-1; phraseLen=0; }
+      if(Math.abs(v.sobel.gxBias())>18 && sh(s,31)<0.72) { dir=v.sobel.gxBias()>0?1:-1; phraseLen=0; }
+      phraseLen++;
+
+      const phraseFlip=5+Math.floor(sh(phraseSeed++,13)*5);
+      if(phraseLen>phraseFlip && sh(s,17)<0.38+v.fineDetail*0.25) { dir=-dir; phraseLen=0; }
+
+      const cell=score.motifs[score.motifOf[s]];
+      const isReturn=cell && cell.firstStep<s && cell.pitchCell && cell.pitchCell.length;
+      const useMotif=isReturn && sh(s,91)<0.72;
+      const motifCell=useMotif?cell.pitchCell:null;
+      const noteEvents=[];
+
+      for(let i=0;i<chosen.length;i++) {
+        const e=chosen[i];
+        let pc;
+        if(motifCell && i<motifCell.length) {
+          const shift=params.freeRead?0:(lroot-cell.mRoot+12)%12;
+          pc=(motifCell[i]+shift)%12;
+        } else if(params.freeRead) {
+          pc=Math.round(e.hue/30)%12;
+        } else {
+          const deg=Math.round(e.hue/360*scaleDegs.length)%scaleDegs.length;
+          pc=scalePcs[deg];
+        }
+
+        /* Prevent the lead from becoming trapped on one pitch. Repetition is
+           permitted only occasionally, and visual material gets first choice
+           before the wandering rule takes over. */
+        const sameLast=(lastNote>=0);
+        const recentPenalty=recent.includes(pc)?0.18:0;
+        const angularChance=clamp01(0.16+v.fineDetail*0.30+v.eventEnergy*0.18+recentPenalty);
+        let movement;
+        const r=sh(s*17+i*7,55);
+        if(r<angularChance) movement=dir*(2+Math.floor(sh(s*29+i,56)*3));
+        else movement=dir*(1+(sh(s*31+i,57)<0.18?1:0));
+
+        if(sameLast && pc===lastPc) {
+          /* Sometimes keep the exact note when the image strongly repeats;
+             otherwise walk away by one or more scale degrees. */
+          const intentionalRepeat=(v.eventEnergy<0.34 && sh(s*11+i,59)<0.28);
+          if(!intentionalRepeat) {
+            if(params.freeRead) pc=(pc+movement+12)%12;
+            else {
+              const currentDeg=scalePcs.indexOf(pc)>=0?scalePcs.indexOf(pc):Math.round(pc);
+              pc=scalePcs[(currentDeg+movement+scaleDegs.length*4)%scaleDegs.length];
+            }
+          }
+        }
+
+        /* Smooth wandering uses image value for register; angular events can
+           temporarily escape farther from that target. */
+        const imageTarget=lerp(leadLo,leadHi,clamp01(e.val*0.72+v.bright*0.28));
+        let target=sameLast?lerp(lastNote,imageTarget,0.38):imageTarget;
+        const angular=(Math.abs(movement)>=3);
+        if(angular) target+=dir*(4+Math.floor(v.eventEnergy*6));
+        if(bassPull>=0 && v.balance>0.58 && sh(s+i,63)<0.42) {
+          target=lerp(target,bassPull+dir*(9+v.fineDetail*5),0.12);
+        }
+        target=Math.max(leadLo+2,Math.min(leadHi-2,target));
+
+        let note=placePc(pc,target,leadLo,leadHi);
+        if(!params.freeRead) note=snapToScale(note,lroot,lmode,params.scaleLock);
+        note=foldInto(note,leadLo,leadHi);
+
+        if(sameLast && note===lastNote) {
+          /* Hard escape hatch. This is deliberately musical rather than
+             random: choose a neighboring scale degree in the current contour. */
+          for(let attempt=1;attempt<=scalePcs.length;attempt++) {
+            let testPc;
+            if(params.freeRead) testPc=(pc+dir*attempt+12)%12;
+            else {
+              const idx=Math.max(0,scalePcs.indexOf(pc));
+              testPc=scalePcs[(idx+dir*attempt+scalePcs.length*4)%scalePcs.length];
+            }
+            let test=placePc(testPc,target+dir*(attempt*2),leadLo,leadHi);
+            if(!params.freeRead) test=snapToScale(test,lroot,lmode,params.scaleLock);
+            test=foldInto(test,leadLo,leadHi);
+            if(test!==lastNote) { note=test; pc=testPc; break; }
+          }
+        }
+
+        const onT=s+clamp01(e.normX)*0.48+(i/k)*0.16;
+        const stabBase=Math.max(0.05,leadStab*lrhythm.noteLen);
+        const hold=stabBase*(angular?0.78:1.0)*(0.72+0.45*(1-v.fineDetail));
+        const offT=Math.min(s+0.92,onT+Math.max(0.08,hold/k));
+        const baseVel=(velMin+(velMax-velMin)*(0.22+0.72*e.sat))*lrhythm.velScale;
+        const accent=1.0+e.strength*0.12+(angular?0.06:0);
+        const vel=clampVel(baseVel*v.dyn*accent*(0.70+0.52*leadShare));
+        noteEvents.push({onT,offT,note,pc,vel,angular});
       }
-      prev = edge;
+
+      /* Tiny visual events can become lead articulation rather than a separate
+         drum. This is the actual percussion split: fine image activity belongs
+         to the lead when its affinity is higher than the bass's. */
+      for(const ne of noteEvents) {
+        events.lead.push({time:ne.onT,type:'on',midi:ne.note,vel:ne.vel,channel:2});
+        events.lead.push({time:ne.offT,type:'off',midi:ne.note,vel:0,channel:2});
+        lastNote=ne.note; lastPc=ne.pc;
+        recent.push(ne.pc); if(recent.length>5) recent.shift();
+      }
+
+      /* A strong bass-owned event gets a lead answer only when the image also
+         contains enough fine detail. It is an image-derived response, not a
+         generic call-and-response generator. */
+      if(v.balance>0.62 && v.fineDetail>0.38 && bassPull>=0 && sh(s,73)<v.fineDetail) {
+        let answer= bassPull + dir*(7+Math.round(v.meanSat*5));
+        answer=foldInto(answer,leadLo,leadHi);
+        if(!params.freeRead) answer=snapToScale(answer,lroot,lmode,params.scaleLock);
+        if(answer!==lastNote) {
+          const t=s+0.68;
+          const vel=clampVel((velMin+(velMax-velMin)*0.45)*v.dyn*(0.82+leadShare*0.3));
+          events.lead.push({time:t,type:'on',midi:answer,vel,channel:2});
+          events.lead.push({time:t+Math.max(0.08,leadStab*lrhythm.noteLen*0.32),type:'off',midi:answer,vel:0,channel:2});
+          lastNote=answer; lastPc=answer%12;
+          recent.push(lastPc); if(recent.length>5) recent.shift();
+        }
+      }
     }
   }
+
+  /* No percussion events are generated.  The perc array remains present only
+     for compatibility with the existing playback/mixer code. */
   return events;
 }
 
 function pickMode(ctx, warmHi, warmLo, satLo) {
-  const warm = ctx.warm_cool_ratio, sat = ctx.saturation, tex = ctx.texture_complexity;
-  if (sat < satLo) return warm >= 0.5 ? "penta_major" : "penta_minor";
-  if (warm >= warmHi) return ctx.brightness > 0.6 ? "lydian" : "major";
-  if (warm <= warmLo) return tex > 0.55 ? "phrygian" : (sat > 0.5 ? "japanese" : "minor");
+  if (ctx._v2) return ctx._v2.music.mode.name;
+
+  const warm = ctx.warm_cool_ratio;
+  const sat = ctx.saturation;
+  const tex = ctx.texture_complexity;
+
+  if (sat < satLo) {
+    return warm >= 0.5
+      ? "penta_major"
+      : "penta_minor";
+  }
+
+  if (warm >= warmHi) {
+    return ctx.brightness > 0.6
+      ? "lydian"
+      : "major";
+  }
+
+  if (warm <= warmLo) {
+    return tex > 0.55
+      ? "phrygian"
+      : (
+          sat > 0.5
+            ? "japanese"
+            : "minor"
+        );
+  }
+
   return "dorian";
 }
-function tempoBpm(ctx, calm, busy) { return calm + (busy - calm) * Math.min(1, ctx.edge_density * 2); }
 
+function tempoBpm(ctx, calm, busy) {
+  if (ctx._v2) {
+    const t =
+      Math.min(
+        1,
+        (ctx._v2.music.tempo.bpm - 60) / 100
+      );
+
+    return (
+      calm +
+      (busy - calm) * t
+    );
+  }
+
+  return (
+    calm +
+    (busy - calm) *
+    Math.min(
+      1,
+      ctx.edge_density * 2
+    )
+  );
+}
 async function generateAndPlay() {
-  if (!loadedImage || !ready) return;
+  if (!loadedImage || !canPlay()) return;
   stopPlayback();
   panic();
   const p = getParams();
@@ -981,32 +2768,323 @@ async function generateAndPlay() {
   canvas.width = w; canvas.height = h;
   const ctx2d = canvas.getContext('2d');
   ctx2d.drawImage(loadedImage, 0, 0, w, h);
+  layoutPreview();                 // backing store changed — resync display box
   const width = w, height = h;
   const imgData = ctx2d.getImageData(0,0,width,height);
   const rgb = imgData.data;
   const gray = new Float32Array(width*height);
-  for (let i=0; i<gray.length; i++) { const j=i*4; gray[i]=0.299*rgb[j]+0.587*rgb[j+1]+0.114*rgb[j+2]; }
+  for (let i=0; i<gray.length; i++) { const j=i*4; gray[i]=ImageField.lum(rgb[j],rgb[j+1],rgb[j+2]); }
   const globalCtx = analyzeImageFull(rgb, width, height);
-  const rootPc = pickRoot(globalCtx, p.rootHueOffset);
-  const mode = pickMode(globalCtx, p.warmHi, p.warmLo, p.satLo);
+  const rootPc = p.freeRead ? 0 : pickRoot(globalCtx, p.rootHueOffset);
+  const mode = p.freeRead ? 'chromatic' : pickMode(globalCtx, p.warmHi, p.warmLo, p.satLo);
   const bpm = tempoBpm(globalCtx, p.bpmCalm, p.bpmBusy);
+  /* v2: thread spatial + section data through */
+  if(globalCtx._v2){
+    globalCtx._v2_spatial = globalCtx._v2.spatial2D;
+    globalCtx._v2_sections = globalCtx._v2.sections;
+    globalCtx._v2_music = globalCtx._v2.music;
+    globalCtx._v2_bounds = globalCtx._v2.contentBounds;
+  }
   const events = buildVoices(gray, rgb, width, height, globalCtx, rootPc, mode, p);
+  const vSections = buildVoices._sections;
+  scrubSections = vSections;
+  drawSectionViz(vSections);
+
+  /* DUAL: rotate the buffer and read the same image again along the other
+     axis, keeping only the lead. Two simultaneous reads of one picture. */
+  if(dualMode){
+    const tRgb  = transposeRGB(rgb, width, height);
+    const tW = height, tH = width;                  // dims swap
+    const tGray = grayFrom(tRgb, tW * tH);
+    const tCtx  = analyzeImageFull(tRgb, tW, tH);
+    const tRoot = p.freeRead ? 0 : pickRoot(tCtx, p.rootHueOffset);
+    const tMode = p.freeRead ? 'chromatic' : pickMode(tCtx, p.warmHi, p.warmLo, p.satLo);
+    const hp = Object.assign({}, p, { usePad:false, useBass:false, useLead:true });
+    const hEvents = buildVoices(tGray, tRgb, tW, tH, tCtx, tRoot, tMode, hp);
+    // upright pass keeps pad+bass+its own lead; H pass adds a second lead line
+    events.lead = events.lead.concat(hEvents.lead);
+    buildVoices._sections = vSections;              // restore for the status line
+  }
   const beatDur = 60 / bpm;
   const allEvents = [...events.pad, ...events.bass, ...events.lead, ...events.perc];
   allEvents.sort((a,b)=>(a.time-b.time)||(a.type==='off'?1:-1));
-  allEvents.forEach(ev => {
-    const delay = ev.time * p.stepBeats * beatDur * 1000;
-    const timer = setTimeout(() => {
-      if (!ready) return;
-      if (ev.type === 'on') synth.noteOn(ev.channel, ev.midi, ev.vel);
-      else synth.noteOff(ev.channel, ev.midi);
-    }, delay);
-    scheduledTimeouts.push(timer);
-  });
-  setStatus('ready', `Playing: ${NOTE_NAMES[rootPc]} ${mode} @ ${Math.round(bpm)} BPM`);
+
+  /* Precompute absolute ms offsets once. Math.max(...arr) was used here
+     before and blows the call stack on long/dense scores.               */
+  const msPerStep = p.stepBeats * beatDur * 1000;
+  let finalTime = 0;
+  for(let i=0;i<allEvents.length;i++){
+    allEvents[i]._ms = allEvents[i].time * msPerStep;
+    if(allEvents[i].time > finalTime) finalTime = allEvents[i].time;
+  }
+  startPlayback(allEvents, (finalTime + 1) * msPerStep + 120, p.chordSections);
+  // Count unique modes across sections for status
+  const secModes = [...new Set((buildVoices._sections||[]).map(s=>NOTE_NAMES[s.lroot]+'·'+s.lmode.replace('penta_','p.')))];
+  const modeStr = p.freeRead ? 'FREE READ' : (secModes.length>1 ? `${secModes.length} moods` : secModes[0]||mode);
+  const sc = buildVoices._score;
+  const motifCount = sc ? sc.motifs.length : '?';
+  const peakPct = sc ? Math.round(sc.peakStep/p.steps*100) : '?';
+  setStatus('ready', `Playing: ${modeStr} @ ${Math.round(bpm)} BPM | ${motifCount} motifs | peak@${peakPct}%`);
 }
 
-function stopPlayback() { scheduledTimeouts.forEach(clearTimeout); scheduledTimeouts = []; panic(); }
+/* ═════════════ PLAYBACK SCHEDULER + READ-POSITION PLAYHEAD ═════════════
+   The old build created one setTimeout per note event. A dense score
+   (steps up to 512 × lead flurry) produced several thousand live timers,
+   all of which the browser has to service on the same thread that handles
+   your touches — so the keyboard trailed the finger during playback and
+   the notes themselves drifted.
+
+   This is a standard lookahead scheduler: one interval wakes every 25ms
+   and fires anything due in the next 120ms. Constant cost, no timer pile.
+
+   The playhead reads the image top→bottom, because sections are cut with
+   bandRange(height, ...) — horizontal bands stacked vertically.           */
+
+let playEvents = [], playIdx = 0, playStart = 0, playDur = 0;
+let schedTimer = null, playing = false;
+
+function startPlayback(events, durMs, sections){
+  playEvents = events; playIdx = 0; playDur = durMs;
+  playStart = performance.now();
+  scheduledTimeouts.forEach(clearTimeout);
+  scheduledTimeouts = [];
+  playing = true;
+  drawSectionLines(sections);
+  $('playhead').style.display = 'block';
+  clearInterval(schedTimer);
+  schedTimer = setInterval(schedTick, CFG.SCHED_TICK);
+  schedTick();
+}
+
+function fireEvent(ev){
+  if(!playing || !canPlay()) return;
+  if(ev.type === 'on') eNoteOn(ev.channel, ev.midi, ev.vel);
+  else eNoteOff(ev.channel, ev.midi);
+}
+
+function schedTick(){
+  if(!playing) return;
+  const now = performance.now() - playStart;
+  const horizon = now + CFG.SCHED_AHEAD;
+  /* Events inside the window get a short, precise timer for the remaining
+     delta rather than firing at horizon time — the synth's noteOn is
+     immediate, so dispatching on discovery would smear notes early.
+     At most one lookahead window of timers is ever alive.               */
+  while(playIdx < playEvents.length && playEvents[playIdx]._ms <= horizon){
+    const ev = playEvents[playIdx++];
+    const delay = ev._ms - now;
+    if(delay <= 1) fireEvent(ev);
+    else scheduledTimeouts.push(setTimeout(fireEvent, delay, ev));
+  }
+  if(scheduledTimeouts.length > 400) scheduledTimeouts = scheduledTimeouts.slice(-200);
+  if(now >= playDur){
+    playing = false;
+    clearInterval(schedTimer); schedTimer = null;
+    panic();
+    hidePlayhead();
+    setStatus('idle', 'finished');
+  }
+}
+
+/* Playhead is moved from the existing scope rAF — no second loop. */
+function flushPlayhead(ts){
+  if(!playing) return;
+  const wrap = $('imgWrap');
+  if(wrap.style.display === 'none') return;
+  const prog = clamp((performance.now() - playStart) / playDur, 0, 1);
+  const h = wrap.clientHeight;
+  const ph = $('playhead');
+  ph.style.transform = 'translateY(' + (prog * h).toFixed(1) + 'px)';
+  const rp = $('readPos');
+  if(rp) rp.textContent = 'READ ' + Math.round(prog*100) + '%  ·  ROW ' +
+    Math.round(prog * (loadedImage ? loadedImage.naturalHeight : 0)) +
+    ' / ' + (loadedImage ? loadedImage.naturalHeight : 0);
+}
+
+function hidePlayhead(){
+  $('playhead').style.display = 'none';
+  $('playhead').style.transform = 'translateY(0)';
+  const vb = $('vbar'); if(vb){ vb.style.display='none'; vb.style.transform='translateX(0)'; }
+  const rp = $('readPos'); if(rp) rp.textContent = '';
+}
+
+/* Faint dashed rules showing where each chord section starts in the image */
+function drawSectionLines(n){
+  const box = $('secLines');
+  box.innerHTML = '';
+  if(!n || n < 2) return;
+  for(let i=1;i<n;i++){
+    const el = document.createElement('i');
+    el.style.top = (i*100/n) + '%';
+    box.appendChild(el);
+  }
+}
+
+/* Size the preview so the drawn image keeps its true aspect ratio.
+   The old CSS was width:100% + max-height:100px with no object-fit, which
+   squashed any image taller than the box.                                */
+/* The stage takes whatever height is left after the tray and the panels,
+   within sane bounds — so folding the keyboard enlarges the image. */
+function previewMaxH(){
+  const dock = parseInt(getComputedStyle(document.documentElement)
+                 .getPropertyValue('--dockH')) || 190;
+  return clamp(Math.round(window.innerHeight - dock - 230), 120, 460);
+}
+function layoutPreview(){
+  if(!loadedImage) return;
+  const wrap = $('imgWrap');
+  const parent = wrap.parentElement;
+  if(!parent || parent.clientWidth < 40) return;   // section collapsed
+  const availW = parent.clientWidth - 2;
+  const iw = loadedImage.naturalWidth, ih = loadedImage.naturalHeight;
+  const scale = Math.min(availW / iw, previewMaxH() / ih);
+  wrap.style.width  = Math.round(iw * scale) + 'px';
+  wrap.style.height = Math.round(ih * scale) + 'px';
+}
+
+/* ═════════════ DUAL AXIS (V + H) ═════════════
+   The engine reads sections as horizontal bands: bandRange(height,...).
+   Rather than write a transposed twin of every analysis function, we
+   transpose the pixel buffer once and re-run the exact same code path.
+   Pass 1 (upright) → pad + bass.  Pass 2 (rotated) → lead.
+   Two independent reads of one image, firing together.                  */
+let dualMode = false;
+
+function transposeRGB(rgb, w, h){
+  const out = new Uint8ClampedArray(w * h * 4);
+  for(let y = 0; y < h; y++){
+    const ry = y * w;
+    for(let x = 0; x < w; x++){
+      const si = (ry + x) * 4;
+      const di = (x * h + y) * 4;          // (x,y) -> (y,x), new width = h
+      out[di]   = rgb[si];
+      out[di+1] = rgb[si+1];
+      out[di+2] = rgb[si+2];
+      out[di+3] = rgb[si+3];
+    }
+  }
+  return out;
+}
+function grayFrom(rgb, n){
+  const g = new Float32Array(n);
+  for(let i = 0; i < n; i++){ const j = i*4; g[i] = ImageField.lum(rgb[j], rgb[j+1], rgb[j+2]); }
+  return g;
+}
+
+/* ═════════════ DRAG-TO-SCRUB ═════════════
+   Drag on the image to hold a position. Vertical picks the section (its
+   chord sustains on pad + bass); horizontal picks a lead pitch from that
+   section's scale — which is exactly the raster the generator reads.    */
+let scrubMode = false, scrubSections = null, scrubHeld = [], scrubLead = null;
+
+function scrubStop(){
+  scrubHeld.forEach(([ch,m]) => eNoteOff(ch, m));
+  scrubHeld = [];
+  if(scrubLead != null){ eNoteOff(2, scrubLead); scrubLead = null; }
+}
+
+function scrubAt(fx, fy){
+  if(!scrubSections || !scrubSections.length || !canPlay()) return;
+  const p = getParams();
+  const n = scrubSections.length;
+  const si = clamp(Math.floor(fy * n), 0, n - 1);
+  const sec = scrubSections[si];
+
+  // chord changes only when we cross a band edge — no retrigger storm
+  if(scrubAt._sec !== si){
+    scrubAt._sec = si;
+    scrubHeld.forEach(([ch,m]) => eNoteOff(ch, m));
+    scrubHeld = [];
+    if(p.usePad){
+      const size = Math.min(4, sec.chord.length);
+      for(let j = 0; j < size; j++){
+        const m = placePc(sec.chord[j] % 12, p.padLo + (p.padHi - p.padLo) * 0.45 + j*2, p.padLo, p.padHi);
+        eNoteOn(3, m, 74); scrubHeld.push([3, m]);
+      }
+    }
+    if(p.useBass){
+      const m = placePc(sec.chord[0] % 12, (p.bassLo + p.bassHi) / 2, p.bassLo, p.bassHi);
+      eNoteOn(1, m, 96); scrubHeld.push([1, m]);
+    }
+  }
+
+  // horizontal → lead degree within this section's mode
+  if(p.useLead){
+    const degs = MODES[sec.lmode] || MODES.minor;
+    const span = degs.length * 2;
+    const di   = clamp(Math.floor(fx * span), 0, span - 1);
+    const oct  = Math.floor(di / degs.length);
+    const pc   = (sec.lroot + degs[di % degs.length]) % 12;
+    const m    = placePc(pc, p.leadLo + (p.leadHi - p.leadLo) * (0.25 + 0.5 * fx) + oct * 12, p.leadLo, p.leadHi);
+    if(m !== scrubLead){
+      if(scrubLead != null) eNoteOff(2, scrubLead);
+      eNoteOn(2, m, 88);
+      scrubLead = m;
+    }
+  }
+
+  const ph = $('playhead');
+  ph.style.display = 'block';
+  ph.style.transform = 'translateY(' + (fy * $('imgWrap').clientHeight).toFixed(1) + 'px)';
+  const vb = $('vbar');
+  if(vb){ vb.style.display = 'block'; vb.style.transform = 'translateX(' + (fx * $('imgWrap').clientWidth).toFixed(1) + 'px)'; }
+  const rp = $('readPos');
+  if(rp) rp.textContent = 'SCRUB §' + (si+1) + '/' + n + '  ' +
+    (sec.lmode === 'chromatic' ? 'FREE' : NOTE_NAMES[sec.lroot] + ' ' + sec.lmode.replace('penta_','p.'));
+}
+
+function initScrub(){
+  const wrap = $('imgWrap');
+  const pos = e => {
+    const r = wrap.getBoundingClientRect();
+    return [clamp((e.clientX - r.left)/r.width, 0, 0.9999),
+            clamp((e.clientY - r.top )/r.height,0, 0.9999)];
+  };
+  wrap.addEventListener('pointerdown', e=>{
+    if(!scrubMode) return;
+    e.preventDefault(); resume();
+    if(playing) stopPlayback();
+    try{ wrap.setPointerCapture(e.pointerId); }catch(err){}
+    scrubAt._sec = -1;
+    const [fx,fy] = pos(e); scrubAt(fx,fy);
+  }, {passive:false});
+  wrap.addEventListener('pointermove', e=>{
+    if(!scrubMode || !e.buttons && e.pointerType === 'mouse') return;
+    if(!wrap.hasPointerCapture || !wrap.hasPointerCapture(e.pointerId)) return;
+    e.preventDefault();
+    const [fx,fy] = pos(e); scrubAt(fx,fy);
+  }, {passive:false});
+  const end = e=>{
+    if(!scrubMode) return;
+    scrubStop(); scrubAt._sec = -1;
+    hidePlayhead();
+    try{ wrap.releasePointerCapture(e.pointerId); }catch(err){}
+  };
+  wrap.addEventListener('pointerup', end);
+  wrap.addEventListener('pointercancel', end);
+}
+
+function setScrub(on){
+  scrubMode = on;
+  $('btnScrub').classList.toggle('act', on);
+  $('imgWrap').style.touchAction = on ? 'none' : '';
+  $('imgWrap').style.cursor = on ? 'crosshair' : '';
+  if(!on){ scrubStop(); hidePlayhead(); }
+  else if(!scrubSections) setStatus('load', 'SCRUB: run GENERATE once to map the image, then drag it');
+}
+
+function stopPlayback() {
+  playing = false;
+  clearInterval(schedTimer); schedTimer = null;
+  playEvents = []; playIdx = 0;
+  scheduledTimeouts.forEach(clearTimeout);
+  scheduledTimeouts = [];
+  sweepTimers.forEach(clearTimeout);
+  sweepTimers = [];
+  panic();
+  hidePlayhead();
+  setStatus('idle', 'stopped');
+}
 
 $('loadImageBtn').addEventListener('click', ()=>{
   const input = document.createElement('input');
@@ -1014,30 +3092,90 @@ $('loadImageBtn').addEventListener('click', ()=>{
   input.onchange = async (e)=>{
     const file = e.target.files[0]; if(!file) return;
     const img = new Image();
+    const url = URL.createObjectURL(file);
     img.onload = ()=>{
       loadedImage = img;
       const canvas = $('imageCanvas');
       const maxDim = +$('analyzeMax').value; let w=img.naturalWidth, h=img.naturalHeight;
       if(w>maxDim||h>maxDim){ const ratio = Math.min(maxDim/w, maxDim/h); w=Math.floor(w*ratio); h=Math.floor(h*ratio); }
       canvas.width = w; canvas.height = h;
-      canvas.style.display = 'block';
       const ctx2d = canvas.getContext('2d');
       ctx2d.drawImage(img,0,0,w,h);
-      $('generateBtn').disabled = !ready;
-      setStatus('inf', 'Image loaded. Adjust knobs, then GENERATE.');
+      $('imgWrap').style.display = 'block';
+      layoutPreview();
+      $('secLines').innerHTML = '';
+      hidePlayhead();
+      $('generateBtn').disabled = false;
+      setStatus('load', img.naturalWidth+'×'+img.naturalHeight+' loaded · GENERATE when ready');
+      URL.revokeObjectURL(url);
     };
-    img.src = URL.createObjectURL(file);
+    img.onerror = ()=>{ setStatus('err','could not decode image'); URL.revokeObjectURL(url); };
+    img.src = url;
   };
   input.click();
 });
-$('generateBtn').addEventListener('click', generateAndPlay);
+$('generateBtn').addEventListener('click', ()=>{ initAudio().then(generateAndPlay); });
 $('stopBtn').addEventListener('click', stopPlayback);
+
+/* engine + mode buttons */
+function setEngine(m){
+  engineMode = m;
+  $('engOsc').classList.toggle('act', m === 'osc');
+  $('engSf').classList.toggle('act', m === 'sf');
+  panic();
+  if(m === 'sf' && !ready) setStatus('load', 'no soundfont loaded — tap LOAD SF, or stay on OSC');
+  else setStatus('ready', m === 'osc' ? 'built-in oscillators' : 'soundfont engine');
+}
+$('engOsc').addEventListener('click', ()=>{ initAudio().then(()=>setEngine('osc')); });
+$('engSf') .addEventListener('click', ()=>setEngine('sf'));
+$('oscWave').addEventListener('change', e=>{ Osc.wave = e.target.value; });
+$('btnDual').addEventListener('click', ()=>{
+  dualMode = !dualMode;
+  $('btnDual').classList.toggle('act', dualMode);
+  setStatus('load', dualMode ? 'DUAL on — regenerate to read both axes' : 'single axis (vertical)');
+});
+$('btnScrub').addEventListener('click', ()=>setScrub(!scrubMode));
+
+// --- scope popup toggle ---
+$('scopeBtn').addEventListener('click', ()=>{
+  const popup = $('scopePopup');
+  popup.classList.toggle('open');
+  scopeOpen = popup.classList.contains('open');
+  $('scopeBtn').classList.toggle('act', scopeOpen);
+  if(scopeOpen) requestAnimationFrame(sizeScope);
+});
+/* The old 200ms setInterval that mirrored readouts into the popup is gone —
+   flushReadout() writes both copies in one pass on the animation frame. */
 
 // --- init ---
 scopeCv = $('scope'); scopeCx = scopeCv.getContext('2d');
 sizeScope(); startScope();
 $('octVal').textContent = 'C'+baseOct;
 buildKeyboard();
+measureDock();
+$('keys').classList.remove('off');   // OSC engine is always available
+initScrub();
+
+/* Several value labels disagreed with their slider (STEPS showed 128 for a
+   value of 64, LEAD ACTIVITY showed 9 for 7) and several sliders had a min
+   above their own default, so the browser silently clamped them. Read the
+   real post-clamp values and print those.                                */
+['bpmCalm','bpmBusy','warmHi','warmLo','satLo','rootHueOffset','padLo','padHi','bassLo','bassHi',
+ 'leadLo','leadHi','stepsSlider','stepBeats','analyzeMax','chordSecSlider','flurrySlider',
+ 'gateDarkSlider','leadStab','chordStrum','bassDiv','velMin','velMax','percTexGate','percEdgeGate']
+.forEach(id=>{
+  const el = $(id), valEl = $(id+'Val');
+  if(!el || !valEl) return;
+  const v = parseFloat(el.value);
+  valEl.textContent = Number.isInteger(v) ? v : v.toFixed(2);
+});
+
+// collapsed sections boot with the right chevron
+document.querySelectorAll('.collapsible.collapsed').forEach(el=>{
+  const ic = el.querySelector('.toggle-icon');
+  if(ic) ic.textContent = '▶';
+});
+
 setStatus('idle', 'idle');
 </script>
 </body>
